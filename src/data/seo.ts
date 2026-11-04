@@ -4,7 +4,7 @@
  * IMPORTANTE: se o endereço do site mudar, troque SITE_URL aqui e também
  * em index.html, public/robots.txt e public/sitemap.xml.
  */
-export const SITE_URL = 'https://royalmarineservice.com.br'
+export const SITE_URL = 'https://royalmarineubatuba.com.br'
 export const SITE_NAME = 'Royal Marine - Garagem Náutica'
 export const OG_IMAGE = '/images/og-royal-marine.jpg'
 

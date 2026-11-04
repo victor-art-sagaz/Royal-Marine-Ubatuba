@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://royalmarineservice.com.br/sitemap.xml
+Sitemap: https://royalmarineubatuba.com.br/sitemap.xml
