@@ -1,4 +1,5 @@
 import { CalendarCheck, Clock, MapPin, Sparkles, Target, Wrench } from 'lucide-react'
+import Faq from '../components/Faq'
 import GlassButton from '../components/GlassButton'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
@@ -106,6 +107,9 @@ export default function About() {
           })}
         </div>
       </section>
+
+      {/* Perguntas frequentes */}
+      <Faq />
 
       {/* Chamada */}
       <section className="relative overflow-hidden py-16 text-center text-white">

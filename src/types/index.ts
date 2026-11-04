@@ -83,6 +83,15 @@ export interface BlogPost {
   blocks: PostBlock[]
 }
 
+/** Uma pergunta frequente (FAQ) com a resposta. */
+export interface FaqItem {
+  id: string
+  question: string
+  /** Cada texto vira um parágrafo. */
+  answer: string[]
+  icon: LucideIcon
+}
+
 export interface TimelineItem {
   label: string
   text: string
