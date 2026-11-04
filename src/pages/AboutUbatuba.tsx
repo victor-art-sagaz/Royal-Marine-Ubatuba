@@ -13,6 +13,8 @@ import { ubatubaHistoryTitle, ubatubaIntro, ubatubaMoreUrl, ubatubaTimeline } fr
 interface GalleryPhoto {
   src: string
   alt: string
+  /** Em qual das 3 colunas a foto fica (0 = esquerda, 1 = meio, 2 = direita) */
+  column: 0 | 1 | 2
   caption?: string
   credit?: string
   creditUrl?: string
@@ -20,15 +22,19 @@ interface GalleryPhoto {
   optional?: boolean
 }
 
+/**
+ * As fotos já estão distribuídas nas colunas de modo que as três terminem com quase a mesma altura.
+ * Dentro de cada coluna, a ordem é de cima para baixo.
+ */
 const gallery: GalleryPhoto[] = [
-  { src: images.ubatubaPraia, alt: 'Ondas e rocha na areia de uma praia de Ubatuba' },
-  { src: images.ubatubaEnseada, alt: 'Enseada de águas verdes cercada por Mata Atlântica em Ubatuba' },
-  { src: images.ubatubaSurf, alt: 'Surfista dentro do tubo de uma onda, com a Mata Atlântica ao fundo' },
-  { src: images.ubatubaCantinho, alt: 'Pequena praia de águas verdes entre pedras e Mata Atlântica' },
-  { src: images.ubatubaCaverna, alt: 'Vista do mar e da praia a partir de uma gruta de pedra' },
-  { src: images.ubatubaGaivotas, alt: 'Gaivotas na areia, com o mar e o morro ao fundo' },
-  { src: images.ubatubaPlaca, alt: 'Letreiro colorido "Eu amo Ubatuba" à beira-mar' },
+  { column: 0, src: images.ubatubaGaivotas, alt: 'Gaivotas na areia, com o mar e o morro ao fundo' },
+  { column: 0, src: images.ubatubaSurf, alt: 'Surfista dentro do tubo de uma onda, com a Mata Atlântica ao fundo' },
+  { column: 0, src: images.ubatubaPlaca, alt: 'Letreiro colorido "Eu amo Ubatuba" à beira-mar' },
+  { column: 1, src: images.ubatubaCantinho, alt: 'Pequena praia de águas verdes entre pedras e Mata Atlântica' },
+  { column: 1, src: images.ubatubaCaverna, alt: 'Vista do mar e da praia a partir de uma gruta de pedra' },
+  { column: 2, src: images.ubatubaPraia, alt: 'Ondas e rocha na areia de uma praia de Ubatuba' },
   {
+    column: 2,
     src: images.ubatubaBaleia,
     alt: 'Esqueleto de baleia-jubarte exposto em Ubatuba',
     caption: 'Esqueleto de baleia-jubarte em Ubatuba',
@@ -43,6 +49,9 @@ export default function AboutUbatuba() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   const visible = gallery.filter((photo) => !missing.includes(photo.src))
+  const columns = [0, 1, 2].map((column) => visible.filter((photo) => photo.column === column))
+  // Ordem das fotos na tela cheia: coluna da esquerda, do meio e da direita, de cima para baixo
+  const ordered = columns.flat()
 
   return (
     <>
@@ -104,34 +113,38 @@ export default function AboutUbatuba() {
 
           {/* Galeria */}
           <div className="mx-auto mt-16 max-w-6xl px-6">
-            <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-              {visible.map((photo, index) => (
-                <Reveal key={photo.src} delay={(index % 3) * 0.08} className="mb-4 break-inside-avoid">
-                  <button
-                    type="button"
-                    onClick={() => setOpenIndex(index)}
-                    className="group relative block w-full overflow-hidden rounded-3xl border-4 border-white/90 bg-navy-dark shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal"
-                    aria-label={`Ampliar foto: ${photo.alt}`}
-                  >
-                    <img
-                      src={photo.src}
-                      alt={photo.alt}
-                      className="block h-auto w-full transition duration-700 group-hover:scale-105"
-                      loading="lazy"
-                      onError={() => {
-                        if (photo.optional) setMissing((list) => [...list, photo.src])
-                      }}
-                    />
-                    <span className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-navy-dark/50 text-white opacity-0 backdrop-blur-md transition duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-                      <ZoomIn size={18} aria-hidden="true" />
-                    </span>
-                    {photo.credit ? (
-                      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-dark/85 to-transparent px-4 pb-3 pt-8 text-left text-xs text-white/90">
-                        Foto: <span className="font-medium text-teal">{photo.credit}</span>
-                      </span>
-                    ) : null}
-                  </button>
-                </Reveal>
+            <div className="grid items-start gap-4 md:grid-cols-3">
+              {columns.map((photos, column) => (
+                <div key={column} className="flex flex-col gap-4">
+                  {photos.map((photo, row) => (
+                    <Reveal key={photo.src} delay={(column + row) * 0.08}>
+                      <button
+                        type="button"
+                        onClick={() => setOpenIndex(ordered.indexOf(photo))}
+                        className="group relative block w-full overflow-hidden rounded-3xl border-4 border-white/90 bg-navy-dark shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal"
+                        aria-label={`Ampliar foto: ${photo.alt}`}
+                      >
+                        <img
+                          src={photo.src}
+                          alt={photo.alt}
+                          className="block h-auto w-full transition duration-700 group-hover:scale-105"
+                          loading="lazy"
+                          onError={() => {
+                            if (photo.optional) setMissing((list) => [...list, photo.src])
+                          }}
+                        />
+                        <span className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-navy-dark/50 text-white opacity-0 backdrop-blur-md transition duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                          <ZoomIn size={18} aria-hidden="true" />
+                        </span>
+                        {photo.credit ? (
+                          <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-dark/85 to-transparent px-4 pb-3 pt-8 text-left text-xs text-white/90">
+                            Foto: <span className="font-medium text-teal">{photo.credit}</span>
+                          </span>
+                        ) : null}
+                      </button>
+                    </Reveal>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
@@ -141,7 +154,7 @@ export default function AboutUbatuba() {
       </section>
 
       <Lightbox
-        items={visible.map((photo) => ({
+        items={ordered.map((photo) => ({
           src: photo.src,
           alt: photo.alt,
           caption: photo.caption,
