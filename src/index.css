@@ -1,0 +1,383 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white font-sans text-neutral-700 antialiased;
+}
+
+h1, h2, h3, h4 {
+  @apply font-display uppercase tracking-tight text-neutral-800;
+}
+
+/* Texto selecionado com a cor da marca */
+::selection {
+  background: rgba(116, 186, 197, 0.35);
+}
+
+/* ------------------------------------------------------------------ */
+/* Contato: mar, barco que segue o toque e botão-mar                    */
+/* ------------------------------------------------------------------ */
+.sea-bg {
+  background:
+    radial-gradient(1100px 520px at 16% 0%, rgba(56, 189, 248, 0.22), transparent 62%),
+    radial-gradient(900px 560px at 90% 78%, rgba(94, 234, 212, 0.3), transparent 62%),
+    linear-gradient(180deg, #0a1a33 0%, #0a4f7a 40%, #1597b0 72%, #46cfd0 100%);
+}
+
+.boat-outer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform, filter;
+}
+
+.boat-inner {
+  position: absolute;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.reserve-btn {
+  position: relative;
+  width: min(100%, 19rem);
+  height: 4.25rem;
+  border: 0;
+  border-radius: 9999px;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+  color: #0a1a33;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #f6e3a0, #c9a227 55%, #a8801a);
+  box-shadow: 0 10px 30px -8px rgba(201, 162, 39, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: filter 0.2s ease, box-shadow 0.3s ease;
+}
+
+.reserve-btn:hover {
+  filter: brightness(1.07);
+}
+
+.reserve-btn:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.reserve-sea {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.reserve-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 100%;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.reserve-btn[data-sea='on'] {
+  pointer-events: none;
+  filter: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55), 0 14px 34px -10px rgba(8, 145, 178, 0.75);
+}
+
+.reserve-btn[data-sea='on'] .reserve-sea {
+  opacity: 1;
+}
+
+.reserve-btn[data-sea='on'] .reserve-label {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* ------------------------------------------------------------------ */
+/* Cartão de confirmação que "vira" (logo Royal Marine -> resumo)        */
+/* ------------------------------------------------------------------ */
+.modal-backdrop {
+  background: rgba(3, 14, 28, 0.6);
+  backdrop-filter: blur(3px);
+  animation: fade-in 0.3s ease both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.flip-scene {
+  perspective: 1400px;
+  animation: scene-in 0.35s ease 0.1s both;
+}
+
+@keyframes scene-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.flip-card {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: card-flip 1.6s linear 0.1s both;
+}
+
+@keyframes card-flip {
+  0% {
+    transform: translateY(24px) scale(0.55) rotateY(0deg);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  26% {
+    transform: translateY(0) scale(1) rotateY(0deg);
+    animation-timing-function: linear;
+  }
+  38% {
+    transform: translateY(0) scale(1) rotateY(0deg);
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.25, 1.12);
+  }
+  100% {
+    transform: translateY(0) scale(1) rotateY(180deg);
+  }
+}
+
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(20, 40, 75, 0.12);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.7);
+  color: #14284b;
+}
+
+/* Frente: cartão branco com a logo original */
+.flip-emblem {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+/* Verso: cartão claro, cor de espuma do mar */
+.flip-content {
+  position: relative;
+  overflow: hidden;
+  transform: rotateY(180deg);
+  padding: 1.75rem 1.5rem 1.5rem;
+  background: linear-gradient(165deg, #ffffff 0%, #eef6fa 55%, #d9ebf2 100%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Previsão do tempo                                                    */
+/* ------------------------------------------------------------------ */
+.wx-shimmer {
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.18) 25%, rgba(148, 163, 184, 0.35) 50%, rgba(148, 163, 184, 0.18) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Sobre Ubatuba: tartarugas e baleias nadando devagar                  */
+/* ------------------------------------------------------------------ */
+.deep-sea {
+  background:
+    radial-gradient(900px 480px at 12% 8%, rgba(56, 189, 248, 0.18), transparent 60%),
+    radial-gradient(800px 520px at 92% 90%, rgba(45, 212, 191, 0.2), transparent 60%),
+    linear-gradient(180deg, #14284b 0%, #0b4a6f 55%, #0e6f86 100%);
+}
+
+.swimmer {
+  position: absolute;
+  left: 0;
+  will-change: transform;
+}
+
+@keyframes swim-right {
+  from {
+    transform: translate3d(-28vw, 0, 0);
+  }
+  to {
+    transform: translate3d(128vw, 0, 0);
+  }
+}
+
+@keyframes swim-left {
+  from {
+    transform: translate3d(128vw, 0, 0);
+  }
+  to {
+    transform: translate3d(-28vw, 0, 0);
+  }
+}
+
+@keyframes swim-sway {
+  0%,
+  100% {
+    transform: translate3d(0, -12px, 0) rotate(-3deg);
+  }
+  50% {
+    transform: translate3d(0, 12px, 0) rotate(3deg);
+  }
+}
+
+/* Tartaruga: as nadadeiras da frente remam como asas, as de trás balançam e a cabeça acompanha */
+@keyframes turtle-row-a {
+  0%,
+  100% {
+    transform: rotate(26deg);
+  }
+  50% {
+    transform: rotate(-36deg);
+  }
+}
+
+@keyframes turtle-row-b {
+  0%,
+  100% {
+    transform: rotate(-26deg);
+  }
+  50% {
+    transform: rotate(36deg);
+  }
+}
+
+@keyframes turtle-hind-a {
+  0%,
+  100% {
+    transform: rotate(-14deg);
+  }
+  50% {
+    transform: rotate(16deg);
+  }
+}
+
+@keyframes turtle-hind-b {
+  0%,
+  100% {
+    transform: rotate(14deg);
+  }
+  50% {
+    transform: rotate(-16deg);
+  }
+}
+
+@keyframes turtle-head {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+/* Baleia: nadadeiras peitorais abrem e fecham, o corpo ondula e a cauda bate */
+@keyframes whale-pec-a {
+  0%,
+  100% {
+    transform: rotate(-14deg);
+  }
+  50% {
+    transform: rotate(22deg);
+  }
+}
+
+@keyframes whale-pec-b {
+  0%,
+  100% {
+    transform: rotate(14deg);
+  }
+  50% {
+    transform: rotate(-22deg);
+  }
+}
+
+@keyframes whale-body {
+  0%,
+  100% {
+    transform: rotate(-1.8deg);
+  }
+  50% {
+    transform: rotate(1.8deg);
+  }
+}
+
+@keyframes whale-tail {
+  0%,
+  100% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(-5deg);
+  }
+}
+
+@keyframes fluke {
+  0%,
+  100% {
+    transform: rotate(-16deg);
+  }
+  50% {
+    transform: rotate(16deg);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Respeita quem desativa animações no aparelho                         */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .flip-scene {
+    animation: none;
+  }
+  .flip-card {
+    animation: none;
+    transform: rotateY(180deg);
+  }
+  .modal-backdrop {
+    animation: none;
+  }
+}
