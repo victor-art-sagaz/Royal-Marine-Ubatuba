@@ -51,7 +51,7 @@ export const posts: BlogPost[] = [
         type: 'link',
         text: 'Para conhecer mais do aplicativo, acesse:',
         label: 'boletimaomar.com.br',
-        url: 'http://boletimaomar.com.br/',
+        url: 'https://boletimaomar.com.br/',
       },
       { type: 'partners', src: '/images/blog/parceiros.jpg', alt: 'Parceiros do aplicativo: Marinha do Brasil, DHN, RUMAR e Abrigo do Marinheiro' },
     ],
@@ -92,7 +92,7 @@ export const posts: BlogPost[] = [
       {
         type: 'source',
         label: 'Texto oficial disponível em:',
-        url: 'http://www.dpc.mar.mil.br/pt-br/comunicacao-social/op_verao17_18',
+        url: 'https://www.marinha.mil.br/dpc/',
       },
       {
         type: 'video',
@@ -130,7 +130,7 @@ export const posts: BlogPost[] = [
       {
         type: 'source',
         label: 'Divulgado em:',
-        url: 'http://www.nautica.com.br/saco-da-ribeira-em-ubatuba-ganha-nova-marina',
+        url: 'https://www.nautica.com.br/saco-da-ribeira-em-ubatuba-ganha-nova-marina',
       },
       {
         type: 'figure',

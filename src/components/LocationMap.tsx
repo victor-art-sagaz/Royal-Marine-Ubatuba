@@ -60,7 +60,7 @@ export default function LocationMap() {
                 title={`Mapa do Google: ${address.label} da Royal Marine`}
                 src={mapsEmbedUrl(address)}
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
+                referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
                 className="absolute inset-0 h-full w-full border-0"
                 initial={{ opacity: 0 }}

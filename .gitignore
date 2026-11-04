@@ -1,3 +1,16 @@
+# Dependências e arquivos gerados
 node_modules
 dist
+
+# Segredos e configurações locais (nunca enviar para o GitHub)
+.env
+.env.*
+!.env.example
 *.local
+*.pem
+*.key
+
+# Vercel e arquivos do sistema
+.vercel
+.DS_Store
+npm-debug.log*
