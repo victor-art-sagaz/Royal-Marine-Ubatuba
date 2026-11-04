@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Menu, Waves, X } from 'lucide-react'
 import { menuItems } from '../data/site'
 import { BAND_HEIGHT, BAND_LOGO_W, useLogoFlight } from '../lib/useLogoFlight'
+import { useSeo } from '../lib/useSeo'
 import Logo, { LogoAnchor } from './Logo'
 import Footer from './Footer'
 
@@ -13,6 +14,9 @@ export default function Layout() {
   const [open, setOpen] = useState<boolean>(isDesktop)
   const { pathname } = useLocation()
   const isHome = pathname === '/'
+
+  // Título, descrição e prévia de compartilhamento de cada página
+  useSeo()
 
   const logoRef = useRef<HTMLAnchorElement>(null)
   const navRef = useRef<HTMLElement>(null)

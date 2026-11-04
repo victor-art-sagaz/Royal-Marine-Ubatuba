@@ -7,6 +7,7 @@ import Contact from './pages/Contact'
 import Home from './pages/Home'
 import News from './pages/News'
 import NewsPost from './pages/NewsPost'
+import Privacy from './pages/Privacy'
 import Weather from './pages/Weather'
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/news/:id" element={<NewsPost />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/newpage1" element={<AboutUbatuba />} />
+        <Route path="/privacidade" element={<Privacy />} />
         <Route path="*" element={<Coming title="PÁGINA NÃO ENCONTRADA" />} />
       </Route>
     </Routes>
