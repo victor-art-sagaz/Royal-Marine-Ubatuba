@@ -3,8 +3,10 @@ import GlassButton from '../components/GlassButton'
 import GoogleReviews from '../components/GoogleReviews'
 import Reveal from '../components/Reveal'
 import StatsBand from '../components/StatsBand'
+import StructureGallery from '../components/StructureGallery'
 import WaveDivider from '../components/WaveDivider'
 import { contact, images } from '../data/site'
+import { whatsappUrl } from '../lib/whatsapp'
 import type { Feature } from '../types'
 
 const features: Feature[] = [
@@ -20,7 +22,7 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="relative flex min-h-[78vh] items-center justify-center overflow-hidden bg-navy-dark px-6 pb-28 pt-24 text-center">
+      <section aria-labelledby="inicio-titulo" className="relative flex min-h-[78vh] items-center justify-center overflow-hidden bg-navy-dark px-6 pb-28 pt-24 text-center">
         <img
           src={images.ubatubaOndas}
           alt="Ondas quebrando em uma costeira de Ubatuba"
@@ -29,7 +31,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-navy-dark/70 via-navy/40 to-navy-dark/80" />
         <div className="relative z-10 mx-auto max-w-4xl">
           <p className="font-serif text-sm italic text-teal sm:text-base">Royal Marine · Garagem Náutica</p>
-          <h1 className="mt-4 font-display text-4xl font-light leading-tight tracking-wide text-white sm:text-6xl">
+          <h1 id="inicio-titulo" className="mt-4 font-display text-4xl font-light leading-tight tracking-wide text-white sm:text-6xl">
             NOVA GARAGEM NÁUTICA
             <br />
             DE UBATUBA
@@ -37,7 +39,16 @@ export default function Home() {
           <p className="mx-auto mt-6 max-w-xl text-base font-light text-white/90 sm:text-lg">
             Cuidamos da sua embarcação para manter o seu sonho em perfeito estado.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4">
+            {/* Chamada principal: visível logo ao abrir o site, até no celular */}
+            <GlassButton
+              href={whatsappUrl(contact.phones[0].whatsappNumber)}
+              external
+              tone="gold"
+              icon={<MessageCircle size={18} />}
+            >
+              Solicitar orçamento
+            </GlassButton>
             <GlassButton to="/contact" icon={<CalendarCheck size={18} />}>
               Agende uma visita
             </GlassButton>
@@ -106,6 +117,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <StructureGallery />
 
       <StatsBand />
 

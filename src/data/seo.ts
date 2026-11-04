@@ -16,9 +16,9 @@ export interface PageSeo {
 }
 
 export const defaultSeo: PageSeo = {
-  title: 'Royal Marine - Garagem Náutica | Ubatuba',
+  title: 'Garagem Náutica em Ubatuba | Vagas Cobertas | Royal Marine',
   description:
-    'Royal Marine - Garagem Náutica. Novo conceito em garagem náutica de Ubatuba, com mais de 3.000m² de vagas cobertas, alarme e monitoramento online 24 horas.',
+    'Garagem náutica em Ubatuba com vagas cobertas para até 80 embarcações, alarme, monitoramento online 24 horas e equipe técnica. Solicite um orçamento pelo WhatsApp.',
 }
 
 /** Uma entrada por endereço do site (sem a barra final). A Página Inicial é "/". */

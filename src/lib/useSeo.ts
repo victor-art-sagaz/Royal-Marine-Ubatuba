@@ -51,9 +51,16 @@ export function useSeo() {
     const cleanPath = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
     const url = `${SITE_URL}${cleanPath === '/' ? '/' : cleanPath}`
 
+    // Endereços de teste da Vercel (…vercel.app) não devem aparecer no Google: só o domínio oficial
+    const isTestAddress = window.location.hostname.endsWith('.vercel.app')
+
     document.title = seo.title
     setMeta('name', 'description', seo.description)
-    setMeta('name', 'robots', seo.noindex ? 'noindex, follow' : 'index, follow')
+    setMeta(
+      'name',
+      'robots',
+      isTestAddress ? 'noindex, nofollow' : seo.noindex ? 'noindex, follow' : 'index, follow',
+    )
 
     setMeta('property', 'og:title', seo.title)
     setMeta('property', 'og:description', seo.description)

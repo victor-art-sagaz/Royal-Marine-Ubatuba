@@ -83,6 +83,13 @@ export interface BlogPost {
   blocks: PostBlock[]
 }
 
+/** Uma foto da galeria da estrutura (Página Inicial). */
+export interface StructurePhoto {
+  src: string
+  alt: string
+  caption?: string
+}
+
 /** Uma pergunta frequente (FAQ) com a resposta. */
 export interface FaqItem {
   id: string

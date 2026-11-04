@@ -7,6 +7,7 @@ import { BAND_HEIGHT, BAND_LOGO_W, useLogoFlight } from '../lib/useLogoFlight'
 import { useSeo } from '../lib/useSeo'
 import Logo, { LogoAnchor } from './Logo'
 import Footer from './Footer'
+import FloatingWhatsApp from './FloatingWhatsApp'
 
 const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
 
@@ -32,6 +33,14 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen">
+      {/* Atalho para quem navega pelo teclado ou leitor de tela: pula direto para o conteúdo */}
+      <a
+        href="#conteudo"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-full focus:bg-white focus:px-5 focus:py-2 focus:text-sm focus:font-medium focus:text-navy focus:shadow-xl"
+      >
+        Pular para o conteúdo
+      </a>
+
       {/* Fundo escuro atrás do menu no celular */}
       <div
         onClick={() => setOpen(false)}
@@ -41,6 +50,7 @@ export default function Layout() {
         aria-hidden="true"
       />
 
+      <header>
       {/* Botão do menu (efeito vidro) */}
       <button
         type="button"
@@ -72,6 +82,7 @@ export default function Layout() {
           <Logo frameOpacity="var(--logo-frame, 1)" />
         </span>
       </Link>
+      </header>
 
       {/* Menu lateral */}
       <aside
@@ -128,12 +139,15 @@ export default function Layout() {
         {/* Faixa branca da logo: só na Página Inicial */}
         {isHome ? <div aria-hidden="true" className="bg-white" style={{ height: BAND_HEIGHT }} /> : null}
 
-        <main>
+        <main id="conteudo" tabIndex={-1} className="outline-none">
           <Outlet />
         </main>
 
         <Footer />
       </div>
+
+      {/* Botão fixo do WhatsApp */}
+      <FloatingWhatsApp />
     </div>
   )
 }
