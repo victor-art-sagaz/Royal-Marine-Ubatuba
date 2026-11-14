@@ -18,7 +18,7 @@ const sections: PolicySection[] = [
   {
     title: '1. Quem somos',
     paragraphs: [
-      'Este site é da Royal Marine - Garagem Náutica, localizada na Rua Marginal, 181, Saco da Ribeira, Ubatuba - SP, CEP 11680-000. Somos responsáveis pelo cuidado com os dados pessoais que você nos enviar, de acordo com a Lei Geral de Proteção de Dados (LGPD, Lei nº 13.709/2018).',
+      'Este site é da Royal Marine - Garagem Náutica, localizada na Rua Marginal, 181, Saco da Ribeira, Ubatuba - SP, CEP 11685-702. Somos responsáveis pelo cuidado com os dados pessoais que você nos enviar, de acordo com a Lei Geral de Proteção de Dados (LGPD, Lei nº 13.709/2018).',
     ],
   },
   {
@@ -113,7 +113,7 @@ const sections: PolicySection[] = [
 ]
 
 export default function Privacy() {
-  const phone = contact.phones[0]
+  const phone = contact.quotePhone
   return (
     <>
       <PageHero

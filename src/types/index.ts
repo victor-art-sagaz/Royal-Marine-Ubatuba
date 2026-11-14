@@ -35,10 +35,12 @@ export interface ContactInfo {
   name: string
   tagline: string
   addresses: Address[]
+  /** Todos os WhatsApps (usados só na bolha flutuante). */
   phones: Phone[]
+  /** WhatsApp oficial de orçamento e visita (usado em todo o site, menos na bolha). */
+  quotePhone: Phone
   email: string
   instagram: string
-  facebook: string
 }
 
 export interface Review {

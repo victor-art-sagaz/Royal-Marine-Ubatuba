@@ -106,17 +106,14 @@ export default function LocationMap() {
             <div className="border-t border-white/10 pt-5">
               <p className="mb-3 font-display text-sm tracking-wider text-white/90">Ligue pra gente</p>
               <div className="flex flex-wrap gap-2">
-                {contact.phones.map((phone) => (
-                  <GlassButton
-                    key={phone.whatsappNumber}
-                    href={`https://wa.me/${phone.whatsappNumber}`}
-                    external
-                    icon={<MessageCircle size={16} />}
-                    className="px-4 py-2"
-                  >
-                    {phone.display}
-                  </GlassButton>
-                ))}
+                <GlassButton
+                  href={`https://wa.me/${contact.quotePhone.whatsappNumber}`}
+                  external
+                  icon={<MessageCircle size={16} />}
+                  className="px-4 py-2"
+                >
+                  {contact.quotePhone.display}
+                </GlassButton>
               </div>
             </div>
           </div>

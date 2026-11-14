@@ -1,9 +1,10 @@
-import { Anchor, CloudSun, Info, MessageCircle, Mountain, Newspaper } from 'lucide-react'
+import { Anchor, CloudSun, Info, MessageCircle, Mountain, Newspaper, Waves } from 'lucide-react'
 import type { ContactInfo, MenuItem, Stat } from '../types'
 
 export const menuItems: MenuItem[] = [
   { label: 'Página Inicial', path: '/', icon: Anchor },
   { label: 'Previsão do Tempo', path: '/newpage', icon: CloudSun },
+  { label: 'Tábua de Maré', path: '/tabua-de-mare', icon: Waves },
   { label: 'Sobre nós', path: '/about-us', icon: Info },
   { label: 'Nosso Blog', path: '/news', icon: Newspaper },
   { label: 'Contato', path: '/contact', icon: MessageCircle },
@@ -19,7 +20,7 @@ export const contact: ContactInfo = {
       street: 'Rua Marginal, 181',
       district: 'Saco da Ribeira',
       city: 'Ubatuba - SP',
-      cep: '11680-000',
+      cep: '11685-702',
     },
     {
       label: 'Garagem',
@@ -29,24 +30,26 @@ export const contact: ContactInfo = {
       cep: '11680-000',
     },
   ],
+  // Os dois números aparecem só na bolha do WhatsApp (canto da tela)
   phones: [
     { display: '(12) 99248-6817', whatsappNumber: '5512992486817' },
     { display: '(12) 99775-7520', whatsappNumber: '5512997757520' },
   ],
-  email: 'contato@royalmarineservice.com.br',
+  // Número de orçamento e visita: é o único que aparece no resto do site
+  quotePhone: { display: '(12) 99775-7520', whatsappNumber: '5512997757520' },
+  email: 'contatoroyalmarine@gmail.com',
   instagram: 'https://www.instagram.com/royalmarineubatuba',
-  facebook: 'https://www.facebook.com/share/1E3gUBK2tD/',
 }
 
 export const stats: Stat[] = [
-  { value: 3000, suffix: 'm²', label: 'Espaço amplo e coberto' },
-  { value: 80, label: 'Vagas Náuticas' },
-  { value: 5, label: 'Consultores para te atender' },
+  { value: 10000, suffix: 'm²', label: 'Espaço amplo e coberto' },
+  { value: 150, label: 'Vagas Náuticas' },
+  { value: 12, label: 'Consultores para te atender' },
   { value: 20, label: 'Anos de experiência' },
 ]
 
 export const aboutFooter =
-  'Novo conceito em Marina, com mais de 3.000m² de vagas cobertas. com vestiários, sistema de alarme e monitoramento online de sua embarcação.'
+  'Novo conceito em Marina, com 10.000m² de vagas cobertas para até 150 embarcações, vestiários, sistema de alarme e monitoramento online 24h da sua embarcação.'
 
 export const images = {
   galpaoInterior: '/images/galpao-interior.jpg',

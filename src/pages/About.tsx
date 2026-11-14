@@ -1,19 +1,28 @@
-import { CalendarCheck, Clock, MapPin, Sparkles, Target, Wrench } from 'lucide-react'
+import { CalendarCheck, CalendarHeart, Clock, LifeBuoy, MapPin, Sparkles, Target, UtensilsCrossed, Wrench } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import Faq from '../components/Faq'
 import GlassButton from '../components/GlassButton'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
+import StructureGallery from '../components/StructureGallery'
 import { images } from '../data/site'
 import type { Feature } from '../types'
 
 const history: string[] = [
-  'Inaugurada em dezembro/17, a Royal Marine está localizada em Ubatuba, no Litoral Norte de São Paulo, possui um espaço de 3.000m² e capacidade para até 80 embarcações, sendo todas as vagas cobertas. Um novo conceito em garagem náutica em Ubatuba.',
-  'Com Hall social, vestiários, home-box, Wi-Fi, sistema de alarme e monitoramento online 24hs, sala de rádio e outras novidades que serão implementadas nos próximos meses; tais como: loja de peças e artigos náuticos, conveniência e outros.',
+  'Inaugurada em dezembro/17, a Royal Marine está localizada em Ubatuba, no Litoral Norte de São Paulo, possui um espaço de 10.000m² e capacidade para até 150 embarcações, sendo todas as vagas cobertas. Um novo conceito em garagem náutica em Ubatuba.',
+  'Com Hall social, vestiários, home-box, Wi-Fi, sistema de alarme e monitoramento online 24hs, 8 poitas próximas ao canal do Saco da Ribeira, prestação de serviços naval/marítimo (tapeceiro, mecânico, eletricista, serralheiro inox), estética náutica com a parceira WashBoat e despachante náutico, tudo dentro da própria marina.',
   'Nosso diferencial está no atendimento e sistema de operação.',
 ]
 
 const openingHours =
   'Abrimos todos os dias da semana, inclusive em horário de almoço, permitindo a maior flexibilidade de utilização e manutenção de sua embarcação.'
+
+/** Detalhes exclusivos da Royal Marine */
+const exclusives: { icon: LucideIcon; text: string }[] = [
+  { icon: LifeBuoy, text: 'Atendimento pré e pós passeio' },
+  { icon: UtensilsCrossed, text: 'Não fechamos para o almoço' },
+  { icon: CalendarHeart, text: 'Atendimento exclusivo nos feriados' },
+]
 
 const mission =
   'Oferecer para nossos clientes atendimento e sistema de operação diferenciado e de qualidade, para cuidar e realizar manutenção das embarcações, com segurança e através de equipe especializada.'
@@ -21,8 +30,8 @@ const mission =
 const highlights: Feature[] = [
   {
     icon: Sparkles,
-    title: 'Serviço exclusivo',
-    text: 'Para limpeza interna e externa, contamos com outra equipe exclusiva e dedicada somente para esta função. Assim encontramos a excelência na conservação de sua embarcação!',
+    title: 'Estética náutica',
+    text: 'Nos nossos planos, você tem acesso à limpeza e à estética da sua embarcação com a WashBoat, empresa parceira que atende dentro da própria marina. Mais praticidade e excelência na conservação da sua embarcação!',
   },
   {
     icon: MapPin,
@@ -56,6 +65,20 @@ export default function About() {
             <Clock className="mt-0.5 shrink-0 text-teal-dark" size={24} />
             <p className="font-light leading-relaxed text-navy">{openingHours}</p>
           </div>
+          <h3 className="mt-8 font-serif text-sm italic text-teal-dark">Exclusivo da Royal Marine</h3>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-3">
+            {exclusives.map(({ icon: Icon, text }) => (
+              <li
+                key={text}
+                className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-medium text-navy shadow-sm sm:flex-col sm:text-center"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-navy text-teal">
+                  <Icon size={20} aria-hidden="true" />
+                </span>
+                {text}
+              </li>
+            ))}
+          </ul>
         </Reveal>
         <Reveal delay={0.15}>
           <div className="relative">
@@ -107,6 +130,9 @@ export default function About() {
           })}
         </div>
       </section>
+
+      {/* Fotos da garagem (aparece quando houver 3 fotos ou mais em src/data/gallery.ts) */}
+      <StructureGallery />
 
       {/* Perguntas frequentes */}
       <Faq />

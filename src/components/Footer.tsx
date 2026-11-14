@@ -1,4 +1,4 @@
-import { Compass, Facebook, Instagram, LifeBuoy, Mail, MapPin, MessageCircle, Ship, Waves } from 'lucide-react'
+import { Compass, Instagram, LifeBuoy, Mail, MapPin, MessageCircle, Ship, Waves } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { aboutFooter, contact, menuItems } from '../data/site'
 import { LogoAnchor } from './Logo'
@@ -77,19 +77,17 @@ export default function Footer() {
                 <LifeBuoy size={18} className="text-teal" /> Contact us
               </h3>
               <ul className="space-y-3 text-sm text-slate-400">
-                {contact.phones.map((p) => (
-                  <li key={p.whatsappNumber}>
-                    <a
-                      href={`https://wa.me/${p.whatsappNumber}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 transition hover:text-white"
-                    >
-                      <MessageCircle size={16} className="text-teal" />
-                      {p.display}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <a
+                    href={`https://wa.me/${contact.quotePhone.whatsappNumber}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 transition hover:text-white"
+                  >
+                    <MessageCircle size={16} className="text-teal" />
+                    {contact.quotePhone.display}
+                  </a>
+                </li>
                 <li>
                   <a href={`mailto:${contact.email}`} className="inline-flex items-center gap-2 break-all transition hover:text-white">
                     <Mail size={16} className="shrink-0 text-teal" />
@@ -98,9 +96,6 @@ export default function Footer() {
                 </li>
               </ul>
               <div className="mt-5 flex gap-3">
-                <a href={contact.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className={glassRound}>
-                  <Facebook size={20} />
-                </a>
                 <a href={contact.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className={glassRound}>
                   <Instagram size={20} />
                 </a>

@@ -149,7 +149,7 @@ export default function BookingConfirmation({ values, onClose }: BookingConfirma
             </dl>
 
             <div className="relative mt-4 grid gap-2">
-              {contact.phones.map((phone, index) => (
+              {[contact.quotePhone].map((phone, index) => (
                 <a
                   key={phone.whatsappNumber}
                   ref={index === 0 ? firstButton : undefined}
@@ -165,7 +165,7 @@ export default function BookingConfirmation({ values, onClose }: BookingConfirma
             </div>
 
             <p className="relative mt-2.5 text-center text-[11px] leading-snug text-slate-600">
-              Vamos abrir o WhatsApp com a mensagem pronta. Escolha o número que preferir.
+              Vamos abrir o WhatsApp com a mensagem pronta para a nossa equipe.
             </p>
             <button
               type="button"

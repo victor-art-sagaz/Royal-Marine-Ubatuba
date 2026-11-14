@@ -17,7 +17,7 @@ export default function StructureGallery() {
     <section className="bg-white py-20" aria-labelledby="galeria-titulo">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal className="mb-10 text-center">
-          <p className="font-serif text-sm italic text-teal-dark">Mais de 3.000 m² de vagas cobertas</p>
+          <p className="font-serif text-sm italic text-teal-dark">10.000 m² de vagas cobertas</p>
           <h2 id="galeria-titulo" className="mt-2 font-display text-3xl font-light sm:text-4xl">
             Conheça a estrutura
           </h2>

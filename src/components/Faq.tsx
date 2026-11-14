@@ -11,7 +11,7 @@ import { faq } from '../data/faq'
  */
 export default function Faq() {
   const [openId, setOpenId] = useState<string | null>(null)
-  const phone = contact.phones[0]
+  const phone = contact.quotePhone
   const whatsappUrl = `https://wa.me/${phone.whatsappNumber}?text=${encodeURIComponent(
     'Olá! Tenho uma dúvida sobre a Royal Marine - Garagem Náutica.',
   )}`

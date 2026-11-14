@@ -12,7 +12,7 @@ export const faq: FaqItem[] = [
     icon: MapPin,
     answer: [
       'Ficamos no Saco da Ribeira, em Ubatuba, no Litoral Norte de São Paulo.',
-      'A recepção fica na Rua Marginal, 181, e a garagem fica na Rua Codó, 96. O CEP das duas é 11680-000.',
+      'A recepção fica na Rua Marginal, 181 (CEP 11685-702), e a garagem fica na Rua Codó, 96 (CEP 11680-000).',
     ],
   },
   {
@@ -20,8 +20,8 @@ export const faq: FaqItem[] = [
     question: 'Como é a estrutura da garagem náutica?',
     icon: Warehouse,
     answer: [
-      'São mais de 3.000 m² de espaço coberto, com capacidade para até 80 embarcações. Todas as vagas são cobertas.',
-      'Temos hall social, vestiários, home-box, Wi-Fi e sala de rádio.',
+      'São 10.000 m² de espaço coberto, com capacidade para até 150 embarcações. Todas as vagas são cobertas.',
+      'Temos hall social, vestiários, home-box e Wi-Fi, além de 8 poitas próximas ao canal do Saco da Ribeira, exclusivas para nossos clientes.',
     ],
   },
   {
@@ -38,7 +38,8 @@ export const faq: FaqItem[] = [
     icon: Wrench,
     answer: [
       'Temos uma equipe 100% técnica, responsável pelo funcionamento e pela análise das embarcações. Cada embarcação tem uma ficha exclusiva, que registra data, horário, tempo de funcionamento e as ocorrências encontradas.',
-      'A limpeza interna e externa é feita por outra equipe, dedicada só a essa função.',
+      'A limpeza e a estética da embarcação são feitas pela WashBoat, empresa parceira que atende dentro da própria marina. Nos nossos planos, você tem acesso a esse serviço sem sair da Royal Marine.',
+      'Dentro da própria marina você também encontra prestação de serviços naval/marítimo: tapeceiro, mecânico, eletricista, serralheiro inox (náutico), serviços náuticos em geral, além de despachante náutico.',
     ],
   },
   {
@@ -46,7 +47,8 @@ export const faq: FaqItem[] = [
     question: 'Como funciona a subida e a descida da embarcação?',
     icon: Anchor,
     answer: [
-      'Os lançamentos (subida e descida) são ilimitados. Para combinar o horário da sua saída, fale com a nossa equipe pelo WhatsApp.',
+      'Depende do plano: no Mensal – Lancha e no Mensal – Jet Ski as descidas são ilimitadas; no Mensal – Lancha de passeio são 4 descidas e 4 subidas por mês; e no Plano de 1 mês – Avulso, 1 subida e 1 descida. Para combinar o horário da sua saída, fale com a nossa equipe pelo WhatsApp.',
+      'Também oferecemos atendimento pré e pós passeio.',
     ],
   },
   {
@@ -54,18 +56,19 @@ export const faq: FaqItem[] = [
     question: 'Qual é o horário de funcionamento?',
     icon: Clock,
     answer: [
-      'Abrimos todos os dias da semana, inclusive no horário de almoço, para dar mais flexibilidade ao uso e à manutenção da sua embarcação.',
-      'Segunda, terça e quinta, das 9h às 17h. Na quarta abrimos de 10h às 16h. Nas sextas, sábados, domingos e feriados, das 8h às 18h.',
+      'Abrimos todos os dias da semana e não fechamos para o almoço, para dar mais flexibilidade ao uso e à manutenção da sua embarcação. Nos feriados, o atendimento é exclusivo.',
+      'De segunda a sexta, das 8h às 17h. Aos sábados, domingos e feriados, das 8h às 18h. Na temporada de verão, das 8h às 19h.',
       'Os horários podem mudar em datas especiais. Se for ir em um dia de feriado, vale confirmar antes pelo WhatsApp.',
     ],
   },
   {
     id: 'valores',
-    question: 'Como faço para saber os valores e reservar uma vaga?',
+    question: 'Quanto custa e como faço para reservar uma vaga?',
     icon: MessageCircle,
     answer: [
-      'Preencha o formulário na página Contato, com o nome e o tamanho da sua embarcação. Ele abre uma conversa no WhatsApp da Royal Marine já com as informações preenchidas, e a nossa equipe responde com as melhores condições.',
-      'Se preferir, é só chamar direto pelo WhatsApp.',
+      'Mensal – Lancha: R$ 103 por pé (descidas ilimitadas, bote de apoio e poita). Mensal – Lancha de passeio: R$ 88 por pé (4 descidas e 4 subidas por mês). Plano de 1 mês – Avulso: R$ 130 por pé até 30 pés e R$ 150 por pé acima de 30 pés. Mensal – Jet Ski: R$ 850.',
+      'Quem tem mais de uma lancha, ou um jet ski junto com a lancha, pode ter um desconto especial. A vaga diária depende de disponibilidade.',
+      'Para um orçamento, preencha o formulário na página Contato com o nome e o tamanho da sua embarcação, ou chame no WhatsApp (12) 99775-7520.',
     ],
   },
   {

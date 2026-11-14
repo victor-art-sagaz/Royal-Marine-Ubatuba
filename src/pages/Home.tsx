@@ -1,6 +1,7 @@
-import { CalendarCheck, MessageCircle, Radio, ShieldCheck, ShowerHead, Video, Warehouse, Wifi } from 'lucide-react'
+import { Anchor, CalendarCheck, FileCheck, MessageCircle, ShieldCheck, ShowerHead, Video, Warehouse, Wifi, Wrench } from 'lucide-react'
 import GlassButton from '../components/GlassButton'
 import GoogleReviews from '../components/GoogleReviews'
+import Pricing from '../components/Pricing'
 import Reveal from '../components/Reveal'
 import StatsBand from '../components/StatsBand'
 import StructureGallery from '../components/StructureGallery'
@@ -10,12 +11,30 @@ import { whatsappUrl } from '../lib/whatsapp'
 import type { Feature } from '../types'
 
 const features: Feature[] = [
-  { icon: Warehouse, title: 'Vagas cobertas', text: 'Mais de 3.000m² de espaço amplo e coberto para até 80 embarcações.' },
+  { icon: Warehouse, title: 'Vagas cobertas', text: '10.000m² de espaço amplo e coberto para até 150 embarcações.' },
+  {
+    icon: Anchor,
+    title: '8 poitas',
+    text: 'Poitas disponíveis próximas ao canal do Saco da Ribeira, exclusivas para nossos clientes.',
+  },
   { icon: ShieldCheck, title: 'Sistema de alarme', text: 'Segurança reforçada para o seu patrimônio, todos os dias.' },
-  { icon: Video, title: 'Monitoramento online 24h', text: 'Acompanhe a sua embarcação de onde você estiver.' },
+  {
+    icon: Video,
+    title: 'Sua embarcação com monitoramento 24h',
+    text: 'Acompanhe a sua embarcação de onde você estiver.',
+  },
   { icon: ShowerHead, title: 'Vestiários', text: 'Conforto para você e sua família antes e depois da navegação.' },
   { icon: Wifi, title: 'Wi-Fi', text: 'Internet disponível na estrutura para a sua comodidade.' },
-  { icon: Radio, title: 'Sala de rádio', text: 'Apoio e comunicação para quem vive o mundo náutico.' },
+  {
+    icon: Wrench,
+    title: 'Prestação de serviços (naval/marítimo)',
+    text: 'Tapeceiro, mecânico, eletricista, serralheiro inox (náutico) e serviços náuticos em geral dentro da própria marina, além de acesso à estética náutica da parceira WashBoat.',
+  },
+  {
+    icon: FileCheck,
+    title: 'Despachante náutico',
+    text: 'Serviço de despachante náutico para cuidar da documentação da sua embarcação.',
+  },
 ]
 
 export default function Home() {
@@ -42,7 +61,7 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4">
             {/* Chamada principal: visível logo ao abrir o site, até no celular */}
             <GlassButton
-              href={whatsappUrl(contact.phones[0].whatsappNumber)}
+              href={whatsappUrl(contact.quotePhone.whatsappNumber)}
               external
               tone="gold"
               icon={<MessageCircle size={18} />}
@@ -99,11 +118,11 @@ export default function Home() {
             <h2 className="mt-2 font-display text-3xl font-light sm:text-4xl">Tudo para a sua embarcação</h2>
             <div className="mx-auto mt-5 h-0.5 w-10 bg-teal" />
           </Reveal>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f, i) => {
               const Icon = f.icon
               return (
-                <Reveal key={f.title} delay={(i % 3) * 0.1}>
+                <Reveal key={f.title} delay={(i % 4) * 0.1}>
                   <div className="h-full rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-navy text-teal">
                       <Icon size={22} />
@@ -117,6 +136,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <Pricing />
 
       <StructureGallery />
 
@@ -143,16 +164,13 @@ export default function Home() {
             <GlassButton to="/contact" icon={<CalendarCheck size={18} />}>
               Preencher formulário
             </GlassButton>
-            {contact.phones.map((p) => (
-              <GlassButton
-                key={p.whatsappNumber}
-                href={`https://wa.me/${p.whatsappNumber}`}
-                external
-                icon={<MessageCircle size={18} />}
-              >
-                {p.display}
-              </GlassButton>
-            ))}
+            <GlassButton
+              href={whatsappUrl(contact.quotePhone.whatsappNumber)}
+              external
+              icon={<MessageCircle size={18} />}
+            >
+              {contact.quotePhone.display}
+            </GlassButton>
           </div>
         </Reveal>
       </section>

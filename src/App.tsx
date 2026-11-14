@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import News from './pages/News'
 import NewsPost from './pages/NewsPost'
 import Privacy from './pages/Privacy'
+import Tide from './pages/Tide'
 import Weather from './pages/Weather'
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/newpage" element={<Weather />} />
+        <Route path="/tabua-de-mare" element={<Tide />} />
         <Route path="/about-us" element={<About />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:id" element={<NewsPost />} />

@@ -18,7 +18,7 @@ export interface PageSeo {
 export const defaultSeo: PageSeo = {
   title: 'Garagem Náutica em Ubatuba | Vagas Cobertas | Royal Marine',
   description:
-    'Garagem náutica em Ubatuba com vagas cobertas para até 80 embarcações, alarme, monitoramento online 24 horas e equipe técnica. Solicite um orçamento pelo WhatsApp.',
+    'Garagem náutica em Ubatuba com 10.000m² de vagas cobertas para até 150 embarcações, poitas, monitoramento 24h e serviços náuticos. Solicite um orçamento.',
 }
 
 /** Uma entrada por endereço do site (sem a barra final). A Página Inicial é "/". */
@@ -29,10 +29,15 @@ export const pageSeo: Record<string, PageSeo> = {
     description:
       'Veja a previsão do tempo, do vento e das ondas em Ubatuba antes de sair com a sua embarcação. Informação para navegar com mais segurança.',
   },
+  '/tabua-de-mare': {
+    title: 'Tábua de Maré em Ubatuba | Royal Marine',
+    description:
+      'Preia-mares e baixa-mares do Saco da Ribeira, em Ubatuba, com gráfico da maré do dia e previsão da atividade dos peixes para a sua pescaria.',
+  },
   '/about-us': {
     title: 'Sobre nós | Royal Marine - Garagem Náutica',
     description:
-      'Conheça a Royal Marine, garagem náutica inaugurada em dezembro de 2017 em Ubatuba, com 3.000m², capacidade para 80 embarcações e todas as vagas cobertas.',
+      'Conheça a Royal Marine, garagem náutica inaugurada em dezembro de 2017 em Ubatuba, com 10.000m², capacidade para 150 embarcações e todas as vagas cobertas.',
   },
   '/news': {
     title: 'Nosso Blog | Royal Marine - Garagem Náutica',
