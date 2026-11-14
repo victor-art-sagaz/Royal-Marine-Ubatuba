@@ -29,7 +29,7 @@ export const faq: FaqItem[] = [
     question: 'Minha embarcação fica segura?',
     icon: ShieldCheck,
     answer: [
-      'Sim. A garagem conta com sistema de alarme e monitoramento online 24 horas da sua embarcação, sempre em local coberto.',
+      'Sim. A garagem conta com sistema de alarme e monitoramento 24 horas da sua embarcação, sempre em local coberto.',
     ],
   },
   {

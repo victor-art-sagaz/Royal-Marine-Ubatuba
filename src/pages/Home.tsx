@@ -21,7 +21,7 @@ const features: Feature[] = [
   {
     icon: Video,
     title: 'Sua embarcação com monitoramento 24h',
-    text: 'Acompanhe a sua embarcação de onde você estiver.',
+    text: 'Vigilância 24 horas na garagem, para a sua embarcação ficar segura enquanto você não está.',
   },
   { icon: ShowerHead, title: 'Vestiários', text: 'Conforto para você e sua família antes e depois da navegação.' },
   { icon: Wifi, title: 'Wi-Fi', text: 'Internet disponível na estrutura para a sua comodidade.' },

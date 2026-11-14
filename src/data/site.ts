@@ -49,7 +49,7 @@ export const stats: Stat[] = [
 ]
 
 export const aboutFooter =
-  'Novo conceito em Marina, com 10.000m² de vagas cobertas para até 150 embarcações, vestiários, sistema de alarme e monitoramento online 24h da sua embarcação.'
+  'Novo conceito em Marina, com 10.000m² de vagas cobertas para até 150 embarcações, vestiários, sistema de alarme e monitoramento 24h da sua embarcação.'
 
 export const images = {
   galpaoInterior: '/images/galpao-interior.jpg',
