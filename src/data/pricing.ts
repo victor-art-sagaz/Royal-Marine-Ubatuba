@@ -42,7 +42,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     id: 'mensal-basic',
     name: 'Mensal Basic',
-    prices: [{ value: 88, unit: 'por pé' }],
+    prices: [{ text: 'Valor sob consulta' }],
     includes: ['4 descidas e 4 subidas por mês', '3 poitas disponíveis'],
     note: 'Não inclui bote de apoio.',
     image: '/images/cuidados/conves.jpg',
