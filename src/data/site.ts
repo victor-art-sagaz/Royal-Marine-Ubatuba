@@ -1,10 +1,11 @@
-import { Anchor, CloudSun, Info, MessageCircle, Mountain, Newspaper, Waves } from 'lucide-react'
+import { Anchor, CloudSun, Info, LifeBuoy, MessageCircle, Mountain, Newspaper, Waves } from 'lucide-react'
 import type { ContactInfo, MenuItem, Stat } from '../types'
 
 export const menuItems: MenuItem[] = [
   { label: 'Página Inicial', path: '/', icon: Anchor },
   { label: 'Previsão do Tempo', path: '/newpage', icon: CloudSun },
   { label: 'Tábua de Maré', path: '/tabua-de-mare', icon: Waves },
+  { label: 'Cuidados a Bordo', path: '/cuidados-a-bordo', icon: LifeBuoy },
   { label: 'Sobre nós', path: '/about-us', icon: Info },
   { label: 'Nosso Blog', path: '/news', icon: Newspaper },
   { label: 'Contato', path: '/contact', icon: MessageCircle },

@@ -47,7 +47,7 @@ export const faq: FaqItem[] = [
     question: 'Como funciona a subida e a descida da embarcação?',
     icon: Anchor,
     answer: [
-      'Depende do plano: no Mensal – Lancha e no Mensal – Jet Ski as descidas são ilimitadas; no Mensal – Lancha de passeio são 4 descidas e 4 subidas por mês; e no Plano de 1 mês – Avulso, 1 subida e 1 descida. Para combinar o horário da sua saída, fale com a nossa equipe pelo WhatsApp.',
+      'Depende do plano: no Mensal Premium e no Mensal – Jet Ski as descidas são ilimitadas, e no Mensal Basic são 4 descidas e 4 subidas por mês. Também fazemos operações avulsas de lançamento e retirada ao mar. Para combinar o horário da sua saída, fale com a nossa equipe pelo WhatsApp.',
       'Também oferecemos atendimento pré e pós passeio.',
     ],
   },
@@ -66,7 +66,7 @@ export const faq: FaqItem[] = [
     question: 'Quanto custa e como faço para reservar uma vaga?',
     icon: MessageCircle,
     answer: [
-      'Mensal – Lancha: R$ 103 por pé (descidas ilimitadas, bote de apoio e poita). Mensal – Lancha de passeio: R$ 88 por pé (4 descidas e 4 subidas por mês). Plano de 1 mês – Avulso: R$ 130 por pé até 30 pés e R$ 150 por pé acima de 30 pés. Mensal – Jet Ski: R$ 850.',
+      'Temos os planos Mensal Premium, Mensal Basic, Vagas para manutenção, Mensal – Jet Ski e Operações avulsas. Os valores de cada um estão na seção Planos e valores, na Página Inicial e na página Contato.',
       'Quem tem mais de uma lancha, ou um jet ski junto com a lancha, pode ter um desconto especial. A vaga diária depende de disponibilidade.',
       'Para um orçamento, preencha o formulário na página Contato com o nome e o tamanho da sua embarcação, ou chame no WhatsApp (12) 99775-7520.',
     ],

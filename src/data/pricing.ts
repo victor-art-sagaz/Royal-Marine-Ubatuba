@@ -1,59 +1,73 @@
 /**
- * Planos e valores da garagem náutica. Para mudar um preço ou um texto, edite aqui:
- * o visual da seção "Valores" se ajusta sozinho.
+ * Planos e valores da garagem náutica. Para mudar um preço, um texto ou a foto de fundo,
+ * edite aqui: o visual da seção "Planos e valores" se ajusta sozinho.
  */
 
 export interface PricingPrice {
-  /** Texto pequeno antes do preço, ex.: "Até 30 pés". Deixe vazio se não tiver. */
+  /** Texto pequeno antes do preço, ex.: "A partir de". Deixe vazio se não tiver. */
   label?: string
-  /** Valor em reais */
-  value: number
-  /** Texto depois do preço, ex.: "por pé". Deixe vazio se for valor fechado. */
+  /** Valor em reais. Deixe sem valor e use "text" para mostrar uma frase no lugar do preço. */
+  value?: number
+  /** Frase no lugar do preço, ex.: "Valor sob consulta" */
+  text?: string
+  /** Texto depois do preço, ex.: "por pé". */
   unit?: string
 }
 
 export interface PricingPlan {
   id: string
   name: string
-  /** Mostra o selo "Mais completo" */
+  /** Linha pequena abaixo do nome (opcional) */
+  subtitle?: string
+  /** Mostra o selo "Mais completo" e a borda dourada */
   featured?: boolean
   prices: PricingPrice[]
-  /** O que está incluído */
+  /** O que está incluído (pode ficar vazio) */
   includes: string[]
-  /** Observação (aparece em itálico, sem o símbolo de "incluído") */
+  /** Observação (aparece em itálico) */
   note?: string
+  /** Foto de fundo do cartão (pasta public/images) */
+  image: string
 }
 
 export const pricingPlans: PricingPlan[] = [
   {
-    id: 'mensal-lancha',
-    name: 'Mensal – Lancha',
+    id: 'mensal-premium',
+    name: 'Mensal Premium',
     featured: true,
-    prices: [{ value: 103, unit: 'por pé' }],
+    prices: [{ text: 'Valor sob consulta' }],
     includes: ['Descidas ilimitadas', 'Bote de apoio', 'Poita'],
+    image: '/images/cuidados/iate-inverno.jpg',
   },
   {
-    id: 'mensal-lancha-passeio',
-    name: 'Mensal – Lancha de passeio',
+    id: 'mensal-basic',
+    name: 'Mensal Basic',
     prices: [{ value: 88, unit: 'por pé' }],
     includes: ['4 descidas e 4 subidas por mês', '3 poitas disponíveis'],
     note: 'Não inclui bote de apoio.',
+    image: '/images/cuidados/conves.jpg',
   },
   {
-    id: 'avulso-1-mes',
-    name: 'Plano de 1 mês – Avulso',
-    prices: [
-      { label: 'Até 30 pés', value: 130, unit: 'por pé' },
-      { label: 'Acima de 30 pés', value: 150, unit: 'por pé' },
-    ],
-    includes: ['1 subida e 1 descida'],
-    note: 'Vaga para manutenção: valor sob consulta.',
+    id: 'vagas-manutencao',
+    name: 'Vagas para manutenção',
+    subtitle: 'Plano de 1 mês',
+    prices: [{ value: 130, unit: 'por pé' }],
+    includes: [],
+    image: '/images/cuidados/parte-eletrica.jpg',
   },
   {
     id: 'mensal-jet-ski',
     name: 'Mensal – Jet Ski',
-    prices: [{ value: 850, unit: 'por mês' }],
+    prices: [{ value: 790, unit: 'por mês' }],
     includes: ['Descidas ilimitadas'],
+    image: '/images/cuidados/marina-equipe.jpg',
+  },
+  {
+    id: 'operacoes-avulsas',
+    name: 'Operações avulsas',
+    prices: [{ label: 'A partir de', value: 200, unit: 'por operação' }],
+    includes: ['Serviços de lançamento e retirada ao mar'],
+    image: '/images/cuidados/timao-seguranca.jpg',
   },
 ]
 

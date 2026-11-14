@@ -10,11 +10,11 @@ import { whatsappUrl } from '../lib/whatsapp'
 const priceFormat = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
 
 const planMessage = (plan: PricingPlan) =>
-  `Olá! Vim pelo site da Royal Marine e gostaria de um orçamento do plano "${plan.name}" para a minha embarcação.`
+  `Olá! Vim pelo site da Royal Marine e gostaria de um orçamento de "${plan.name}" para a minha embarcação.`
 
 const specialIcons = [BadgePercent, CalendarClock]
 
-/** Seção "Valores": os planos da marina, descontos e botão de orçamento em cada plano. */
+/** Seção "Planos e valores": cartões com foto de fundo, descontos e botão de orçamento em cada plano. */
 export default function Pricing() {
   return (
     <section id="valores" className="bg-white py-20" aria-labelledby="valores-titulo">
@@ -31,86 +31,89 @@ export default function Pricing() {
           </p>
         </Reveal>
 
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Cartões centralizados: 1 por linha no celular, 2 no tablet, 3 no computador */}
+        <ul className="flex flex-wrap justify-center gap-5">
           {pricingPlans.map((plan, i) => (
-            <li key={plan.id}>
-              <Reveal delay={(i % 4) * 0.08} className="h-full">
+            <li
+              key={plan.id}
+              className="w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)]"
+            >
+              <Reveal delay={(i % 3) * 0.08} className="h-full">
                 <article
-                  className={`relative flex h-full flex-col overflow-hidden rounded-3xl p-6 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${
-                    plan.featured
-                      ? 'bg-gradient-to-br from-navy-dark via-navy to-[#0e3a52] text-white'
-                      : 'border border-slate-200 bg-white text-navy'
+                  className={`group relative isolate flex h-full min-h-[25rem] flex-col overflow-hidden rounded-3xl p-6 text-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+                    plan.featured ? 'ring-2 ring-[#e2bd45]' : 'ring-1 ring-white/10'
                   }`}
                   aria-labelledby={`plano-${plan.id}`}
                 >
-                  <LogoAnchor
-                    className={`pointer-events-none absolute -right-6 -top-4 h-36 w-auto ${
-                      plan.featured ? 'text-white/[0.06]' : 'text-navy/[0.04]'
-                    }`}
+                  {/* Foto de fundo + película escura para o texto ficar legível */}
+                  <img
+                    src={plan.image}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    className="absolute inset-0 -z-20 h-full w-full object-cover transition duration-700 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-b from-navy-dark/55 via-navy-dark/80 to-navy-dark/95" />
+                  <LogoAnchor className="pointer-events-none absolute -right-6 -top-4 -z-10 h-36 w-auto text-white/[0.07]" />
+
                   {plan.featured ? (
-                    <span className="mb-3 inline-flex w-fit rounded-full border border-[#e2bd45]/50 bg-[#e2bd45]/15 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#f3d97a]">
+                    <span className="mb-3 inline-flex w-fit rounded-full border border-[#e2bd45]/60 bg-navy-dark/60 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#f3d97a] backdrop-blur-sm">
                       Mais completo
                     </span>
                   ) : null}
-                  <h3
-                    id={`plano-${plan.id}`}
-                    className={`relative font-display text-xl tracking-wide ${plan.featured ? 'text-white' : 'text-navy'}`}
-                  >
+                  <h3 id={`plano-${plan.id}`} className="font-display text-xl uppercase tracking-wide text-white">
                     {plan.name}
                   </h3>
+                  {plan.subtitle ? <p className="mt-1 font-serif text-sm italic text-teal">{plan.subtitle}</p> : null}
 
-                  <div className="relative mt-4 space-y-2">
+                  <div className="mt-auto pt-10">
                     {plan.prices.map((price) => (
-                      <div key={`${price.label ?? ''}${price.value}`}>
+                      <div key={`${price.label ?? ''}${price.value ?? price.text}`}>
                         {price.label ? (
-                          <p className={`text-xs uppercase tracking-wider ${plan.featured ? 'text-teal' : 'text-teal-dark'}`}>
-                            {price.label}
-                          </p>
+                          <p className="text-xs uppercase tracking-wider text-teal">{price.label}</p>
                         ) : null}
-                        <p className="font-display text-4xl font-light tracking-wide">
-                          {priceFormat.format(price.value)}
-                          {price.unit ? (
-                            <span className={`ml-1.5 text-base ${plan.featured ? 'text-teal' : 'text-teal-dark'}`}>
-                              {price.unit}
-                            </span>
-                          ) : null}
-                        </p>
+                        {typeof price.value === 'number' ? (
+                          <p className="font-display text-4xl font-light tracking-wide drop-shadow">
+                            {priceFormat.format(price.value)}
+                            {price.unit ? <span className="ml-1.5 text-base text-teal">{price.unit}</span> : null}
+                          </p>
+                        ) : (
+                          <p className="font-display text-3xl font-light tracking-wide drop-shadow">{price.text}</p>
+                        )}
                       </div>
                     ))}
                   </div>
 
-                  <div className={`relative my-5 h-px ${plan.featured ? 'bg-white/15' : 'bg-slate-200'}`} />
-
-                  <ul className="relative flex-1 space-y-2.5 text-sm">
-                    {plan.includes.map((item) => (
-                      <li key={item} className="flex items-start gap-2.5">
-                        <span
-                          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                            plan.featured ? 'bg-teal/25 text-teal' : 'bg-navy text-teal'
-                          }`}
-                        >
-                          <Check size={12} aria-hidden="true" />
-                        </span>
-                        <span className={plan.featured ? 'text-white/90' : ''}>{item}</span>
-                      </li>
-                    ))}
-                    {plan.note ? (
-                      <li className={`flex items-start gap-2.5 italic ${plan.featured ? 'text-white/70' : 'text-slate-500'}`}>
-                        <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
-                        {plan.note}
-                      </li>
-                    ) : null}
-                  </ul>
+                  {plan.includes.length || plan.note ? (
+                    <>
+                      <div className="my-5 h-px bg-white/20" />
+                      <ul className="space-y-2.5 text-sm">
+                        {plan.includes.map((item) => (
+                          <li key={item} className="flex items-start gap-2.5">
+                            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal/30 text-teal">
+                              <Check size={12} aria-hidden="true" />
+                            </span>
+                            <span className="text-white/90">{item}</span>
+                          </li>
+                        ))}
+                        {plan.note ? (
+                          <li className="flex items-start gap-2.5 italic text-white/70">
+                            <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+                            {plan.note}
+                          </li>
+                        ) : null}
+                      </ul>
+                    </>
+                  ) : null}
 
                   <a
                     href={whatsappUrl(contact.quotePhone.whatsappNumber, planMessage(plan))}
                     target="_blank"
                     rel="noreferrer"
-                    className={`relative mt-6 inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal ${
+                    className={`mt-6 inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal ${
                       plan.featured
                         ? 'bg-[#e2bd45] text-navy-dark hover:bg-[#f0cd5a]'
-                        : 'bg-navy text-white hover:bg-navy-dark'
+                        : 'border border-white/40 bg-white/10 text-white backdrop-blur-sm hover:bg-white hover:text-navy'
                     }`}
                   >
                     <MessageCircle size={16} aria-hidden="true" />

@@ -34,6 +34,11 @@ export const pageSeo: Record<string, PageSeo> = {
     description:
       'Preia-mares e baixa-mares do Saco da Ribeira, em Ubatuba, com gráfico da maré do dia e previsão da atividade dos peixes para a sua pescaria.',
   },
+  '/cuidados-a-bordo': {
+    title: 'Cuidados a Bordo | Dicas para Marinheiros | Royal Marine',
+    description:
+      'Cuidados com óleo, combustível, parte elétrica, segurança e o que levar a bordo: dicas da Royal Marine para marinheiros particulares e proprietários em Ubatuba.',
+  },
   '/about-us': {
     title: 'Sobre nós | Royal Marine - Garagem Náutica',
     description:

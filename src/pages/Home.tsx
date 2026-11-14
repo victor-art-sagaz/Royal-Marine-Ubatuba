@@ -15,7 +15,7 @@ const features: Feature[] = [
   {
     icon: Anchor,
     title: '8 poitas',
-    text: 'Poitas disponíveis próximas ao canal do Saco da Ribeira, exclusivas para nossos clientes.',
+    text: 'Poitas disponíveis próximas ao canal do Saco da Ribeira, exclusivas para nossos clientes. Com apoio de bote durante o horário de funcionamento da Marina.',
   },
   { icon: ShieldCheck, title: 'Sistema de alarme', text: 'Segurança reforçada para o seu patrimônio, todos os dias.' },
   {

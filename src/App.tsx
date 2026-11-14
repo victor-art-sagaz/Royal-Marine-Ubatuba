@@ -9,6 +9,7 @@ import News from './pages/News'
 import NewsPost from './pages/NewsPost'
 import Privacy from './pages/Privacy'
 import Tide from './pages/Tide'
+import BoatCare from './pages/BoatCare'
 import Weather from './pages/Weather'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/newpage" element={<Weather />} />
         <Route path="/tabua-de-mare" element={<Tide />} />
+        <Route path="/cuidados-a-bordo" element={<BoatCare />} />
         <Route path="/about-us" element={<About />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:id" element={<NewsPost />} />
