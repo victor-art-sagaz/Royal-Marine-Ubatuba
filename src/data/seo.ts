@@ -58,6 +58,10 @@ export const pageSeo: Record<string, PageSeo> = {
     description:
       'Conheça Ubatuba, no Litoral Norte de São Paulo: praias, enseadas, baleias-jubarte e muito mais para quem ama o mar.',
   },
+  '/termos-de-uso': {
+    title: 'Termos de Uso | Royal Marine - Garagem Náutica',
+    description: 'Regras de uso do site e do app da Royal Marine, incluindo as informações de maré, tempo e alertas.',
+  },
   '/privacidade': {
     title: 'Política de Privacidade | Royal Marine - Garagem Náutica',
     description: 'Saiba como a Royal Marine cuida dos seus dados pessoais, de acordo com a LGPD.',

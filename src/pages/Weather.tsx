@@ -1,5 +1,10 @@
-import { AlertTriangle, ArrowUp, Droplets, ExternalLink, MapPin, RefreshCw, Sunrise, Sunset, Sun, Thermometer, Waves, Wind } from 'lucide-react'
+import { AlertTriangle, ArrowUp, BellPlus, CloudRain, Droplets, ExternalLink, MapPin, RefreshCw, Sunrise, Sunset, Sun, Thermometer, Waves, Wind } from 'lucide-react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
+import AlertDialog from '../components/AlertDialog'
+import type { AlertTarget } from '../components/AlertDialog'
+import InstallAppButton from '../components/InstallAppButton'
+import { dateFromBrazilIso } from '../lib/alerts'
 import GlassButton from '../components/GlassButton'
 import Reveal from '../components/Reveal'
 import WeatherIcon from '../components/WeatherIcon'
@@ -382,6 +387,93 @@ function ErrorCard({ onRetry }: { onRetry: () => void }) {
   )
 }
 
+/* ------------------------------ Alertas de chuva e vento ------------------------------ */
+
+/** A partir de quanto a chuva e o vento entram nos alertas */
+const RAIN_PROB = 50
+const WIND_KMH = 25
+
+interface WeatherEvent {
+  kind: 'rain' | 'wind'
+  time: string
+  value: number
+}
+
+/** Momentos em que começa a chover ou a ventar forte nas próximas 24 horas */
+function findEvents(data: WeatherBundle): WeatherEvent[] {
+  const events: WeatherEvent[] = []
+  data.hourly.forEach((hour, i) => {
+    const prev = data.hourly[i - 1]
+    if (i > 0 && hour.precipProb >= RAIN_PROB && (!prev || prev.precipProb < RAIN_PROB)) {
+      events.push({ kind: 'rain', time: hour.time, value: hour.precipProb })
+    }
+    if (i > 0 && hour.windSpeed >= WIND_KMH && (!prev || prev.windSpeed < WIND_KMH)) {
+      events.push({ kind: 'wind', time: hour.time, value: hour.windSpeed })
+    }
+  })
+  return events.filter((e) => dateFromBrazilIso(e.time).getTime() > Date.now()).slice(0, 6)
+}
+
+function AlertsSection({ data }: { data: WeatherBundle }) {
+  const [target, setTarget] = useState<AlertTarget | null>(null)
+  const events = findEvents(data)
+
+  const summaryOf = (e: WeatherEvent) =>
+    e.kind === 'rain'
+      ? `Chuva prevista a partir das ${time(e.time)} (${round(e.value)}% de chance)`
+      : `Vento forte a partir das ${time(e.time)} (${round(e.value)} km/h)`
+
+  return (
+    <section className="mx-auto max-w-6xl px-6 py-12" aria-labelledby="alertas-titulo">
+      <Reveal>
+        <div className="rounded-3xl border border-teal/40 bg-teal/10 p-6">
+          <h2 id="alertas-titulo" className="flex items-center gap-2 font-display text-2xl font-light tracking-wide">
+            <BellPlus className="text-teal-dark" size={24} aria-hidden="true" /> Alertas de chuva e vento
+          </h2>
+          <p className="mt-2 text-sm font-light">
+            Receba um aviso na sua agenda antes de começar a chover ou ventar forte (a partir de {WIND_KMH} km/h).
+          </p>
+          {events.length ? (
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              {events.map((e) => (
+                <li
+                  key={`${e.kind}-${e.time}`}
+                  className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm"
+                >
+                  <span className="flex items-center gap-3 text-sm">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-teal">
+                      {e.kind === 'rain' ? <CloudRain size={18} aria-hidden="true" /> : <Wind size={18} aria-hidden="true" />}
+                    </span>
+                    {summaryOf(e)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setTarget({ kind: e.kind, eventAt: dateFromBrazilIso(e.time), summary: summaryOf(e) })
+                    }
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-medium text-white transition hover:bg-navy-dark"
+                  >
+                    <BellPlus size={13} aria-hidden="true" /> Criar alerta
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-4 rounded-2xl bg-white p-4 text-sm shadow-sm">
+              Boa notícia: nas próximas 24 horas não há previsão de chuva começando ({RAIN_PROB}% ou mais de chance) nem
+              de vento forte em Ubatuba.
+            </p>
+          )}
+          <p className="mt-4 text-xs text-slate-600">
+            O alerta fica salvo só na sua agenda. Se a previsão mudar, ele não é atualizado.
+          </p>
+        </div>
+      </Reveal>
+      <AlertDialog target={target} onClose={() => setTarget(null)} />
+    </section>
+  )
+}
+
 /* ------------------------------------- Página ------------------------------------- */
 
 export default function Weather() {
@@ -411,6 +503,7 @@ export default function Weather() {
       {state.status === 'ready' ? (
         <>
           <HourlySection data={state.data} />
+          <AlertsSection data={state.data} />
           <DailySection days={state.data.daily} />
           <SeaSection data={state.data} />
         </>
@@ -418,9 +511,12 @@ export default function Weather() {
 
       <section className="bg-white py-12 text-center">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6">
-          <GlassButton href={GOOGLE_WEATHER_URL} external tone="dark" icon={<ExternalLink size={16} />}>
-            Ver previsão também no Google
-          </GlassButton>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <InstallAppButton />
+            <GlassButton href={GOOGLE_WEATHER_URL} external tone="dark" icon={<ExternalLink size={16} />}>
+              Ver previsão também no Google
+            </GlassButton>
+          </div>
           <p className="text-xs text-slate-500">
             Dados meteorológicos por{' '}
             <a href="https://open-meteo.com/" target="_blank" rel="noreferrer" className="underline hover:text-navy">

@@ -84,7 +84,7 @@ export default function News() {
 
   return (
     <>
-      <PageHero title="NOVIDADES" subtitle="Novo conceito em garagem náutica de Ubatuba!" image={images.ubatubaPraia} />
+      <PageHero title="NOVIDADES" subtitle="O lugar mais seguro para a sua embarcação em Ubatuba!" image={images.ubatubaPraia} />
       <section className="mx-auto max-w-6xl px-6 py-20">
         <Reveal className="mb-8">
           <h2 className="font-display text-3xl font-light normal-case sm:text-4xl">

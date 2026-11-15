@@ -9,7 +9,7 @@ import { images } from '../data/site'
 import type { Feature } from '../types'
 
 const history: string[] = [
-  'Inaugurada em dezembro/17, a Royal Marine está localizada em Ubatuba, no Litoral Norte de São Paulo, possui um espaço de 10.000m² e capacidade para até 150 embarcações, sendo todas as vagas cobertas. Um novo conceito em garagem náutica em Ubatuba.',
+  'Inaugurada em dezembro/17, a Royal Marine está localizada em Ubatuba, no Litoral Norte de São Paulo, possui um espaço de 10.000m² e capacidade para até 150 embarcações, sendo todas as vagas cobertas. O lugar mais seguro para a sua embarcação em Ubatuba.',
   'Com Hall social, vestiários, home-box, Wi-Fi, sistema de alarme e monitoramento 24hs, 8 poitas próximas ao canal do Saco da Ribeira, prestação de serviços naval/marítimo (tapeceiro, mecânico, eletricista, serralheiro inox), estética náutica com a parceira WashBoat e despachante náutico, tudo dentro da própria marina.',
   'Nosso diferencial está no atendimento e sistema de operação.',
 ]
@@ -48,7 +48,7 @@ const highlights: Feature[] = [
 export default function About() {
   return (
     <>
-      <PageHero title="SOBRE NÓS" subtitle="Um novo conceito em garagem náutica de Ubatuba!" image={images.ubatubaBaia} />
+      <PageHero title="SOBRE NÓS" subtitle="O lugar mais seguro para a sua embarcação em Ubatuba!" image={images.ubatubaBaia} />
 
       {/* Nossa história */}
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2">

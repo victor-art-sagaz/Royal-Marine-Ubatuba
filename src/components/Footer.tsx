@@ -112,6 +112,9 @@ export default function Footer() {
             <Link to="/privacidade" className="underline-offset-4 transition hover:text-white hover:underline">
               Política de Privacidade
             </Link>
+            <Link to="/termos-de-uso" className="underline-offset-4 transition hover:text-white hover:underline">
+              Termos de Uso
+            </Link>
           </div>
         </div>
       </footer>

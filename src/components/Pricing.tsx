@@ -1,4 +1,4 @@
-import { BadgePercent, CalendarClock, Check, Info, MessageCircle } from 'lucide-react'
+import { BadgePercent, CalendarClock, Check, Info, MessageCircle, Tag } from 'lucide-react'
 import GlassButton from './GlassButton'
 import { LogoAnchor } from './Logo'
 import Reveal from './Reveal'
@@ -7,14 +7,12 @@ import { pricingPlans, pricingSpecials } from '../data/pricing'
 import type { PricingPlan } from '../data/pricing'
 import { whatsappUrl } from '../lib/whatsapp'
 
-const priceFormat = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
-
 const planMessage = (plan: PricingPlan) =>
   `Olá! Vim pelo site da Royal Marine e gostaria de um orçamento de "${plan.name}" para a minha embarcação.`
 
 const specialIcons = [BadgePercent, CalendarClock]
 
-/** Seção "Planos e valores": cartões com foto de fundo, descontos e botão de orçamento em cada plano. */
+/** Seção "Planos e valores": cartões com foto de fundo (valores sob consulta), descontos e botão de orçamento em cada plano. */
 export default function Pricing() {
   return (
     <section id="valores" className="bg-white py-20" aria-labelledby="valores-titulo">
@@ -31,6 +29,24 @@ export default function Pricing() {
           </p>
         </Reveal>
 
+        {/* Aviso único de valores, fora dos cartões */}
+        <div className="mb-5 flex justify-center sm:justify-end">
+          <a
+            href={whatsappUrl(
+              contact.quotePhone.whatsappNumber,
+              'Olá! Vim pelo site da Royal Marine e gostaria de saber os valores dos planos.',
+            )}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-[#e2bd45]/60 bg-[#e2bd45]/10 px-4 py-2 text-sm text-navy transition hover:bg-[#e2bd45]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal"
+          >
+            <Tag size={16} className="text-[#b8901c]" aria-hidden="true" />
+            <span>
+              <strong className="font-medium">Valores sob consulta</strong> · fale com a nossa equipe
+            </span>
+          </a>
+        </div>
+
         {/* Cartões centralizados: 1 por linha no celular, 2 no tablet, 3 no computador */}
         <ul className="flex flex-wrap justify-center gap-5">
           {pricingPlans.map((plan, i) => (
@@ -40,7 +56,7 @@ export default function Pricing() {
             >
               <Reveal delay={(i % 3) * 0.08} className="h-full">
                 <article
-                  className={`group relative isolate flex h-full min-h-[25rem] flex-col overflow-hidden rounded-3xl p-6 text-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+                  className={`group relative isolate flex h-full min-h-[21rem] flex-col overflow-hidden rounded-3xl p-6 text-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${
                     plan.featured ? 'ring-2 ring-[#e2bd45]' : 'ring-1 ring-white/10'
                   }`}
                   aria-labelledby={`plano-${plan.id}`}
@@ -66,23 +82,7 @@ export default function Pricing() {
                   </h3>
                   {plan.subtitle ? <p className="mt-1 font-serif text-sm italic text-teal">{plan.subtitle}</p> : null}
 
-                  <div className="mt-auto pt-10">
-                    {plan.prices.map((price) => (
-                      <div key={`${price.label ?? ''}${price.value ?? price.text}`}>
-                        {price.label ? (
-                          <p className="text-xs uppercase tracking-wider text-teal">{price.label}</p>
-                        ) : null}
-                        {typeof price.value === 'number' ? (
-                          <p className="font-display text-4xl font-light tracking-wide drop-shadow">
-                            {priceFormat.format(price.value)}
-                            {price.unit ? <span className="ml-1.5 text-base text-teal">{price.unit}</span> : null}
-                          </p>
-                        ) : (
-                          <p className="font-display text-3xl font-light tracking-wide drop-shadow">{price.text}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  <div className="mt-auto pt-10" />
 
                   {plan.includes.length || plan.note ? (
                     <>
