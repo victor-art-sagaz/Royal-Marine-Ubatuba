@@ -3,7 +3,6 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { Bell, BellOff, BellRing, CloudSun, Globe, Trash2, Waves, X } from 'lucide-react'
 import { LogoAnchor } from '../components/Logo'
 import InstallAppButton from '../components/InstallAppButton'
-import { formatBrazilDay, formatBrazilTime } from '../lib/alerts'
 import {
   askNotificationPermission,
   removeAlert,
@@ -12,10 +11,12 @@ import {
   useNotificationPermission,
 } from '../lib/appAlerts'
 import { useSeo } from '../lib/useSeo'
+import { AppPrefsProvider, LANGS, useApp } from './i18n'
+import { LanguageSheet } from './AppExtras'
 
 const tabs = [
-  { to: '/app/mare', label: 'Maré', icon: Waves },
-  { to: '/app/tempo', label: 'Tempo', icon: CloudSun },
+  { to: '/app/mare', key: 'tabTide' as const, icon: Waves },
+  { to: '/app/tempo', key: 'tabWeather' as const, icon: CloudSun },
 ]
 
 /** Ondas desenhadas que correm no fundo do app */
@@ -44,25 +45,26 @@ function BackgroundWaves() {
 function AlertsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const alerts = useAppAlerts()
   const permission = useNotificationPermission()
+  const { t, time, longDay } = useApp()
   if (!open) return null
   const upcoming = alerts.filter((a) => a.status === 'scheduled')
   const past = alerts.filter((a) => a.status !== 'scheduled')
 
   return (
     <div className="fixed inset-0 z-[75] flex items-end justify-center" role="presentation">
-      <button type="button" aria-label="Fechar" onClick={onClose} className="absolute inset-0 bg-[#050d1c]/70 backdrop-blur-sm" />
+      <button type="button" aria-label={t('close')} onClick={onClose} className="absolute inset-0 bg-[#050d1c]/70 backdrop-blur-sm" />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="meus-alertas"
-        className="relative max-h-[85vh] w-full max-w-lg animate-fade-up overflow-y-auto rounded-t-[2rem] border-t border-white/10 bg-gradient-to-b from-[#16305a] to-navy-dark p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-white"
+        className="relative max-h-[85vh] w-full max-w-lg animate-fade-up overflow-y-auto rounded-t-[2rem] border-t border-white/10 bg-gradient-to-b from-[#16305a] to-navy-dark p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-white landscape:max-h-[92vh]"
       >
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-white/25" aria-hidden="true" />
         <div className="flex items-center justify-between">
-          <h2 id="meus-alertas" className="font-display text-xl tracking-wide">
-            Meus alertas
+          <h2 id="meus-alertas" className="font-display text-xl tracking-wide text-white">
+            {t('myAlerts')}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Fechar" className="rounded-full p-2 text-white/60 hover:bg-white/10">
+          <button type="button" onClick={onClose} aria-label={t('close')} className="rounded-full p-2 text-white/60 hover:bg-white/10">
             <X size={20} />
           </button>
         </div>
@@ -71,26 +73,26 @@ function AlertsSheet({ open, onClose }: { open: boolean; onClose: () => void }) 
           <div className="mt-4 rounded-2xl bg-amber-400/15 p-4 text-sm text-amber-100">
             {permission === 'default' ? (
               <>
-                Permita as notificações para receber os avisos.
+                {t('allowNotifText')}
                 <button
                   type="button"
                   onClick={() => askNotificationPermission()}
                   className="mt-3 block rounded-full bg-[#e2bd45] px-4 py-2 text-xs font-semibold text-navy-dark"
                 >
-                  Permitir notificações
+                  {t('allowNotif')}
                 </button>
               </>
             ) : permission === 'denied' ? (
-              'As notificações estão bloqueadas. Libere nas configurações do celular (Notificações › Royal Marine).'
+              t('notifDenied')
             ) : (
-              'Este aparelho não aceita notificações do app. No iPhone, instale o app pela Tela de Início (iOS 16.4 ou mais novo).'
+              t('notifUnsupported')
             )}
           </div>
         ) : null}
 
         {upcoming.length === 0 ? (
           <p className="mt-6 text-center text-sm text-white/60">
-            Nenhum alerta agendado. Toque no sino de uma maré, chuva ou vento para criar.
+            {t('noAlerts')}
           </p>
         ) : (
           <ul className="mt-4 space-y-2">
@@ -100,14 +102,14 @@ function AlertsSheet({ open, onClose }: { open: boolean; onClose: () => void }) 
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{a.title}</p>
                   <p className="text-xs text-white/60">
-                    {formatBrazilDay(new Date(a.fireAt))}, {formatBrazilTime(new Date(a.fireAt))} · {a.summary}
+                    {longDay(new Date(a.fireAt))}, {time(new Date(a.fireAt))} · {a.summary}
                   </p>
                   {a.notes ? <p className="truncate text-xs italic text-teal">{a.notes}</p> : null}
                 </div>
                 <button
                   type="button"
                   onClick={() => removeAlert(a.id)}
-                  aria-label={`Apagar alerta ${a.title}`}
+                  aria-label={t('deleteAlert', { name: a.title })}
                   className="rounded-full p-2 text-white/50 hover:bg-white/10 hover:text-white"
                 >
                   <Trash2 size={16} />
@@ -119,14 +121,14 @@ function AlertsSheet({ open, onClose }: { open: boolean; onClose: () => void }) 
 
         {past.length ? (
           <>
-            <p className="mt-5 text-xs uppercase tracking-wider text-white/40">Já passaram</p>
+            <p className="mt-5 text-xs uppercase tracking-wider text-white/40">{t('pastAlerts')}</p>
             <ul className="mt-2 space-y-1">
               {past.map((a) => (
                 <li key={a.id} className="flex items-center justify-between gap-3 text-xs text-white/50">
                   <span className="truncate">
-                    {a.title} · {a.status === 'sent' ? 'enviado' : 'não enviado'}
+                    {a.title} · {a.status === 'sent' ? t('sent') : t('notSent')}
                   </span>
-                  <button type="button" onClick={() => removeAlert(a.id)} aria-label={`Apagar ${a.title}`} className="p-1">
+                  <button type="button" onClick={() => removeAlert(a.id)} aria-label={t('deleteAlert', { name: a.title })} className="p-1">
                     <Trash2 size={14} />
                   </button>
                 </li>
@@ -136,8 +138,7 @@ function AlertsSheet({ open, onClose }: { open: boolean; onClose: () => void }) 
         ) : null}
 
         <p className="mt-6 text-[11px] leading-relaxed text-white/40">
-          Os alertas ficam guardados só neste aparelho. O aviso aparece com o app aberto ou em segundo plano; com o app
-          fechado, o celular pode não avisar. Estimativas por modelo, não use para navegação.
+          {t('alertsFoot')}
         </p>
       </div>
     </div>
@@ -149,7 +150,18 @@ function AlertsSheet({ open, onClose }: { open: boolean; onClose: () => void }) 
  * Visual próprio (fundo azul-marinho, abas embaixo, ondas animadas) mantendo as cores e fontes do site.
  */
 export default function AppShell() {
+  return (
+    <AppPrefsProvider>
+      <ShellLayout />
+    </AppPrefsProvider>
+  )
+}
+
+function ShellLayout() {
   const [showAlerts, setShowAlerts] = useState(false)
+  const [showLang, setShowLang] = useState(false)
+  const { t, lang } = useApp()
+  const flag = LANGS.find((l) => l.code === lang)?.flag
   const alerts = useAppAlerts()
   const permission = useNotificationPermission()
   const pending = alerts.filter((a) => a.status === 'scheduled').length
@@ -169,31 +181,36 @@ export default function AppShell() {
       <BackgroundWaves />
 
       {/* Topo */}
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-navy-dark/80 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-lg items-center justify-between">
+      {/* Com o celular deitado (tela baixa), o topo e as abas ficam mais finos */}
+      <header
+        className={`sticky top-0 z-30 border-b border-white/10 bg-navy-dark/80 pb-3 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-xl [@media(orientation:landscape)_and_(max-height:520px)]:pb-1.5 [@media(orientation:landscape)_and_(max-height:520px)]:pt-[max(0.375rem,env(safe-area-inset-top))]`}
+      >
+        <div className="mx-auto flex max-w-lg items-center justify-between landscape:max-w-5xl">
           <div className="flex items-center gap-2.5">
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
               <LogoAnchor className="h-6 w-auto animate-bob text-white" />
             </span>
             <div className="leading-tight">
               <p className="font-display text-base tracking-[0.2em]">ROYAL MARINE</p>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#e2bd45]">Maré & Tempo</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#e2bd45]">{t('appTitle')}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <a
-              href="/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Abrir o site da Royal Marine"
-              className="flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
+            <button
+              type="button"
+              onClick={() => setShowLang(true)}
+              aria-label={t('language')}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
             >
               <Globe size={20} />
-            </a>
+              <span className="absolute -bottom-0.5 -right-0.5 text-[13px] leading-none" aria-hidden="true">
+                {flag}
+              </span>
+            </button>
             <button
               type="button"
               onClick={() => setShowAlerts(true)}
-              aria-label={`Meus alertas${pending ? `, ${pending} agendados` : ''}`}
+              aria-label={`${t('myAlerts')}${pending ? `, ${t('alertsScheduled', { n: pending })}` : ''}`}
               className="relative flex h-10 w-10 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
             >
               {permission === 'denied' ? <BellOff size={20} /> : <Bell size={20} />}
@@ -209,52 +226,64 @@ export default function AppShell() {
 
       {/* Pedido de notificações (aparece até a pessoa responder) */}
       {permission === 'default' ? (
-        <div className="mx-auto mt-3 max-w-lg px-4">
+        <div className="mx-auto mt-3 max-w-lg px-4 landscape:max-w-5xl">
           <div className="flex items-center gap-3 rounded-2xl border border-[#e2bd45]/30 bg-[#e2bd45]/10 p-3">
             <BellRing size={20} className="shrink-0 text-[#e2bd45]" aria-hidden="true" />
-            <p className="flex-1 text-xs text-white/85">Ative as notificações para receber os avisos de maré, chuva e vento.</p>
+            <p className="flex-1 text-xs text-white/85">{t('notifBanner')}</p>
             <button
               type="button"
               onClick={() => askNotificationPermission()}
               className="shrink-0 rounded-full bg-[#e2bd45] px-3 py-2 text-xs font-semibold text-navy-dark"
             >
-              Ativar
+              {t('enable')}
             </button>
           </div>
         </div>
       ) : null}
 
-      <main className="mx-auto max-w-lg px-4 pb-32 pt-4">
+      <main
+        className={`mx-auto max-w-lg pb-32 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-4 landscape:max-w-5xl [@media(orientation:landscape)_and_(max-height:520px)]:pb-24`}
+      >
         <Outlet />
         <div className="mt-8 flex justify-center">
-          <InstallAppButton />
+          <InstallAppButton
+            text={{
+              button: t('installApp'),
+              title: t('installIos'),
+              close: t('close'),
+              step1: t('ios1'),
+              step2: t('ios2'),
+              step3: t('ios3'),
+            }}
+          />
         </div>
       </main>
 
       {/* Abas embaixo */}
       <nav
-        aria-label="Seções do app"
-        className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        aria-label={t('navLabel')}
+        className={`fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] [@media(orientation:landscape)_and_(max-height:520px)]:pb-[max(0.375rem,env(safe-area-inset-bottom))]`}
       >
         <div className="mx-auto flex max-w-xs items-center gap-1 rounded-full border border-white/15 bg-navy-dark/85 p-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-          {tabs.map(({ to, label, icon: Icon }) => (
+          {tabs.map(({ to, key, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
               className={({ isActive }: { isActive: boolean }) =>
-                `flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-medium transition-all duration-300 ${
+                `flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-medium transition-all duration-300 [@media(orientation:landscape)_and_(max-height:520px)]:py-2 ${
                   isActive ? 'bg-teal text-navy-dark shadow-lg' : 'text-white/70 hover:text-white'
                 }`
               }
             >
               <Icon size={18} aria-hidden="true" />
-              {label}
+              {t(key)}
             </NavLink>
           ))}
         </div>
       </nav>
 
       <AlertsSheet open={showAlerts} onClose={() => setShowAlerts(false)} />
+      <LanguageSheet open={showLang} onClose={() => setShowLang(false)} />
     </div>
   )
 }

@@ -11,6 +11,7 @@ import type { TideDay } from '../lib/tide'
 import { levelOf, solunarDay } from '../lib/solunar'
 import type { ActivityLevel, SolunarDay } from '../lib/solunar'
 import { WEATHER_PLACE } from '../lib/weather'
+import type { Place } from '../lib/weather'
 import { dateAtBrazilHour } from '../lib/alerts'
 
 /** Página da tábua de marés de Ubatuba no tabuademares.com */
@@ -50,20 +51,21 @@ export function dayLabel(date: string, index: number) {
 
 type TideState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; days: TideDay[] }
 
-export function useTides() {
+export function useTides(place: Place = WEATHER_PLACE) {
   const [state, setState] = useState<TideState>({ status: 'loading' })
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
     setState({ status: 'loading' })
-    fetchTides(controller.signal)
+    fetchTides(controller.signal, place)
       .then((days) => setState(days.length ? { status: 'ready', days } : { status: 'error' }))
       .catch(() => {
         if (!controller.signal.aborted) setState({ status: 'error' })
       })
     return () => controller.abort()
-  }, [attempt])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attempt, place.lat, place.lon])
 
   return { state, reload: () => setAttempt((n) => n + 1) }
 }
@@ -109,8 +111,48 @@ function smoothPath(pts: { x: number; y: number }[]) {
   return d
 }
 
-export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: SolunarDay; nowHour: number | null }) {
-  const compact = useCompact()
+/** Textos do gráfico (o app troca pelo idioma escolhido) */
+export interface TideChartLabels {
+  title: string
+  height: string
+  now: string
+  fish: string
+  time: string
+  high: string
+  low: string
+  level: (level: ActivityLevel) => string
+}
+
+const PT_LABELS: TideChartLabels = {
+  title: 'Gráfico da maré',
+  height: 'Altura (m)',
+  now: 'agora',
+  fish: 'Atividade dos peixes',
+  time: 'Tempo (h)',
+  high: 'preia-mar',
+  low: 'baixa-mar',
+  level: (level) => level,
+}
+
+export function TideChart({
+  day,
+  solunar,
+  nowHour,
+  labels = PT_LABELS,
+  locale = 'pt-BR',
+  compact: forceCompact,
+}: {
+  day: TideDay
+  solunar: SolunarDay
+  nowHour: number | null
+  labels?: TideChartLabels
+  locale?: string
+  /** Força o gráfico estreito (letras maiores), usado no app */
+  compact?: boolean
+}) {
+  const m = (value: number) => `${value.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} m`
+  const screenCompact = useCompact()
+  const compact = forceCompact ?? screenCompact
   const W = compact ? 420 : 720
   const xOf = (hour: number) => PAD_L + (hour / 24) * (W - PAD_L - PAD_R)
   const heights = day.points.map((p) => p.height)
@@ -136,8 +178,8 @@ export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: So
       viewBox={`0 0 ${W} ${H}`}
       className="h-auto w-full"
       role="img"
-      aria-label={`Gráfico da maré: ${day.extremes
-        .map((e) => `${e.type === 'high' ? 'preia-mar' : 'baixa-mar'} às ${formatHour(e.hour)} com ${meters(e.height)}`)
+      aria-label={`${labels.title}: ${day.extremes
+        .map((e) => `${e.type === 'high' ? labels.high : labels.low} ${formatHour(e.hour)} · ${m(e.height)}`)
         .join('; ')}`}
     >
       <defs>
@@ -152,12 +194,12 @@ export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: So
         <g key={v}>
           <line x1={PAD_L} x2={W - PAD_R} y1={yOf(v)} y2={yOf(v)} stroke="#e2e8f0" strokeWidth="1" />
           <text x={PAD_L - 8} y={yOf(v) + 4} textAnchor="end" fontSize="12" fill="#64748b">
-            {v.toLocaleString('pt-BR', { minimumFractionDigits: step < 0.25 ? 1 : 2 })}
+            {v.toLocaleString(locale, { minimumFractionDigits: step < 0.25 ? 1 : 2 })}
           </text>
         </g>
       ))}
       <text x={12} y={TIDE_TOP - 14} fontSize="12" fill="#64748b">
-        Altura (m)
+        {labels.height}
       </text>
 
       {/* Eixo X (tempo) */}
@@ -174,7 +216,7 @@ export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: So
         <g>
           <line x1={xOf(nowHour)} x2={xOf(nowHour)} y1={TIDE_TOP - 6} y2={ACT_BOTTOM} stroke="#e2bd45" strokeWidth="2" strokeDasharray="4 4" />
           <text x={xOf(nowHour)} y={TIDE_TOP - 10} textAnchor="middle" fontSize="12" fontWeight="600" fill="#b8901c">
-            agora
+            {labels.now}
           </text>
         </g>
       ) : null}
@@ -192,7 +234,7 @@ export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: So
               {formatHour(e.hour)}
             </text>
             <text x={x} y={high ? y - 9 : y + 36} textAnchor={anchor} fontSize="12" fill="#475569">
-              {meters(e.height)}
+              {m(e.height)}
             </text>
           </g>
         )
@@ -200,7 +242,7 @@ export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: So
 
       {/* Atividade dos peixes, hora a hora */}
       <text x={12} y={ACT_TOP - 10} fontSize="12" fill="#64748b">
-        Atividade dos peixes
+        {labels.fish}
       </text>
       {solunar.hourly.map((score, h) => {
         const height = Math.max(4, (score / 100) * (ACT_BOTTOM - ACT_TOP))
@@ -214,7 +256,7 @@ export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: So
             rx="3"
             fill={levelColor[levelOf(score)]}
           >
-            <title>{`${String(h).padStart(2, '0')}h: atividade ${levelOf(score)}`}</title>
+            <title>{`${String(h).padStart(2, '0')}h: ${labels.level(levelOf(score))}`}</title>
           </rect>
         )
       })}
@@ -226,7 +268,7 @@ export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: So
         </text>
       ))}
       <text x={W - PAD_R} y={H - 2} textAnchor="end" fontSize="11" fill="#94a3b8">
-        Tempo (h)
+        {labels.time}
       </text>
     </svg>
   )

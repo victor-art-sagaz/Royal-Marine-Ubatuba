@@ -6,7 +6,7 @@
   "start_url": "/app/mare",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#0a1a33",
   "theme_color": "#14284b",
   "lang": "pt-BR",

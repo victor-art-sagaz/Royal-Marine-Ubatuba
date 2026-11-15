@@ -4,10 +4,17 @@
  * Para trocar de fonte no futuro (ex.: Google Weather API), basta mexer neste arquivo.
  */
 
-export const WEATHER_PLACE = {
+/** Um lugar com coordenadas (latitude e longitude) */
+export interface Place {
+  name: string
+  lat: number
+  lon: number
+}
+
+export const WEATHER_PLACE: Place = {
   name: 'Saco da Ribeira · Ubatuba',
-  lat: -23.4036,
-  lon: -45.1127,
+  lat: -23.5017,
+  lon: -45.1176,
 }
 
 export type WeatherKind = 'clear' | 'partly' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'storm' | 'snow'
@@ -44,6 +51,14 @@ export interface CurrentWeather {
   windSpeed: number
   windDirection: number
   windGusts: number
+  /** Cobertura de nuvens (%) */
+  cloudCover?: number
+  /** Visibilidade (metros) */
+  visibility?: number
+  /** Ponto de orvalho (°C) */
+  dewPoint?: number
+  /** Índice UV agora */
+  uvIndex?: number
 }
 
 export interface HourlyPoint {
@@ -95,6 +110,10 @@ interface ForecastResponse {
     wind_direction_10m: number
     wind_gusts_10m: number
     is_day: number
+    cloud_cover?: number
+    visibility?: number
+    dew_point_2m?: number
+    uv_index?: number
   }
   hourly: {
     time: string[]
@@ -136,8 +155,17 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   return (await response.json()) as T
 }
 
-async function fetchMarine(signal?: AbortSignal): Promise<MarineResponse | null> {
-  const base = `https://marine-api.open-meteo.com/v1/marine?latitude=${WEATHER_PLACE.lat}&longitude=${WEATHER_PLACE.lon}&daily=wave_height_max&timezone=America%2FSao_Paulo&forecast_days=7`
+/** Pontos do mar perto do lugar (o modelo de ondas às vezes não tem dado colado na praia) */
+export function seaPoints(place: Place): Place[] {
+  return [
+    place,
+    { ...place, lat: place.lat - 0.04, lon: place.lon + 0.04 },
+    { ...place, lat: -23.55, lon: -45.0 },
+  ]
+}
+
+async function fetchMarineAt(place: Place, signal?: AbortSignal): Promise<MarineResponse | null> {
+  const base = `https://marine-api.open-meteo.com/v1/marine?latitude=${place.lat}&longitude=${place.lon}&daily=wave_height_max&timezone=America%2FSao_Paulo&forecast_days=7`
   try {
     return await getJson<MarineResponse>(
       `${base}&current=wave_height,wave_direction,wave_period,sea_surface_temperature`,
@@ -154,15 +182,24 @@ async function fetchMarine(signal?: AbortSignal): Promise<MarineResponse | null>
   }
 }
 
-export async function fetchWeather(signal?: AbortSignal): Promise<WeatherBundle> {
+async function fetchMarine(place: Place, signal?: AbortSignal): Promise<MarineResponse | null> {
+  for (const point of seaPoints(place)) {
+    const data = await fetchMarineAt(point, signal)
+    if (data?.current && typeof data.current.wave_height === 'number') return data
+    if (signal?.aborted) return null
+  }
+  return null
+}
+
+export async function fetchWeather(signal?: AbortSignal, place: Place = WEATHER_PLACE): Promise<WeatherBundle> {
   const forecastUrl =
-    `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_PLACE.lat}&longitude=${WEATHER_PLACE.lon}` +
-    '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day' +
+    `https://api.open-meteo.com/v1/forecast?latitude=${place.lat}&longitude=${place.lon}` +
+    '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,cloud_cover,visibility,dew_point_2m,uv_index' +
     '&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,is_day' +
     '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset,uv_index_max' +
     '&timezone=America%2FSao_Paulo&forecast_days=7&wind_speed_unit=kmh'
 
-  const [forecast, marineRaw] = await Promise.all([getJson<ForecastResponse>(forecastUrl, signal), fetchMarine(signal)])
+  const [forecast, marineRaw] = await Promise.all([getJson<ForecastResponse>(forecastUrl, signal), fetchMarine(place, signal)])
 
   const current: CurrentWeather = {
     time: forecast.current.time,
@@ -175,6 +212,10 @@ export async function fetchWeather(signal?: AbortSignal): Promise<WeatherBundle>
     windSpeed: forecast.current.wind_speed_10m,
     windDirection: forecast.current.wind_direction_10m,
     windGusts: forecast.current.wind_gusts_10m,
+    cloudCover: forecast.current.cloud_cover,
+    visibility: forecast.current.visibility,
+    dewPoint: forecast.current.dew_point_2m,
+    uvIndex: forecast.current.uv_index,
   }
 
   // Próximas 24 horas, a partir da hora atual

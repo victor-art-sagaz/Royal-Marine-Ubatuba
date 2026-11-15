@@ -1,27 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { BellRing, CalendarPlus, Check, Download, X } from 'lucide-react'
 import type { AlertTarget } from '../components/AlertDialog'
-import {
-  LEAD_OPTIONS,
-  alertTime,
-  downloadIcs,
-  formatBrazilDay,
-  formatBrazilTime,
-  googleCalendarUrl,
-  leadLabel,
-} from '../lib/alerts'
+import { LEAD_OPTIONS, alertTime, downloadIcs, googleCalendarUrl } from '../lib/alerts'
 import type { AlertKind, AlertRequest } from '../lib/alerts'
 import { addAlert, askNotificationPermission, useNotificationPermission } from '../lib/appAlerts'
+import { useApp } from './i18n'
+import type { TKey } from './i18n'
 
-const kindTitle: Record<AlertKind, string> = {
-  'tide-high': 'Maré subindo',
-  'tide-low': 'Maré baixando',
-  rain: 'Chuva chegando',
-  wind: 'Vento forte chegando',
+const kindKey: Record<AlertKind, TKey> = {
+  'tide-high': 'kindTideHigh',
+  'tide-low': 'kindTideLow',
+  rain: 'kindRain',
+  wind: 'kindWind',
 }
 
 const leadShort = (m: number) => (m < 60 ? `${m} min` : m === 60 ? '1 h' : `${m / 60} h`)
-const suggestedTitle = (kind: AlertKind, lead: number) => `${kindTitle[kind]} em ${leadShort(lead)}`
 
 /** Gaveta que sobe de baixo para criar um alerta com notificação no app */
 export default function AppAlertSheet({ target, onClose }: { target: AlertTarget | null; onClose: () => void }) {
@@ -32,6 +25,8 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
   const [showCalendar, setShowCalendar] = useState(false)
   const permission = useNotificationPermission()
   const nameRef = useRef<HTMLInputElement>(null)
+  const { t, time, longDay } = useApp()
+  const suggestedTitle = (kind: AlertKind, lead: number) => t('suggested', { kind: t(kindKey[kind]), lead: leadShort(lead) })
 
   useEffect(() => {
     if (!target) return
@@ -40,6 +35,7 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
     setNotes('')
     setDone(false)
     setShowCalendar(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target])
 
   useEffect(() => {
@@ -79,12 +75,12 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
 
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center" role="presentation">
-      <button type="button" aria-label="Fechar" onClick={onClose} className="absolute inset-0 animate-fade-up bg-[#050d1c]/70 backdrop-blur-sm" />
+      <button type="button" aria-label={t('close')} onClick={onClose} className="absolute inset-0 animate-fade-up bg-[#050d1c]/70 backdrop-blur-sm" />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="app-alerta-titulo"
-        className="relative max-h-[90vh] w-full max-w-lg animate-fade-up overflow-y-auto rounded-t-[2rem] border-t border-white/10 bg-gradient-to-b from-[#16305a] to-navy-dark p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-white shadow-2xl"
+        className="relative max-h-[90vh] w-full max-w-lg animate-fade-up overflow-y-auto rounded-t-[2rem] border-t border-white/10 bg-gradient-to-b from-[#16305a] to-navy-dark p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-white shadow-2xl landscape:max-h-[95vh]"
       >
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-white/25" aria-hidden="true" />
         <div className="flex items-start justify-between gap-3">
@@ -93,13 +89,13 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
               <BellRing size={22} aria-hidden="true" />
             </span>
             <div>
-              <h2 id="app-alerta-titulo" className="font-display text-xl tracking-wide">
-                Novo alerta
+              <h2 id="app-alerta-titulo" className="font-display text-xl tracking-wide text-white">
+                {t('newAlert')}
               </h2>
               <p className="text-sm text-teal">{target.summary}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} aria-label="Fechar" className="rounded-full p-2 text-white/60 hover:bg-white/10">
+          <button type="button" onClick={onClose} aria-label={t('close')} className="rounded-full p-2 text-white/60 hover:bg-white/10">
             <X size={20} />
           </button>
         </div>
@@ -109,32 +105,26 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal/20 text-teal">
               <Check size={28} aria-hidden="true" />
             </span>
-            <p className="mt-3 font-display text-lg">Alerta criado!</p>
+            <p className="mt-3 font-display text-lg">{t('created')}</p>
             <p className="mt-1 text-sm text-white/70">
-              {formatBrazilDay(when)}, às {formatBrazilTime(when)}.
+              {longDay(when)}, {t('atTime', { time: time(when) })}.
             </p>
             {permission === 'granted' ? (
-              <p className="mt-3 text-xs text-white/60">
-                A notificação aparece com o app aberto ou em segundo plano. Para garantir o aviso com o app fechado, salve
-                também na agenda.
-              </p>
+              <p className="mt-3 text-xs text-white/60">{t('createdOk')}</p>
             ) : (
-              <p className="mt-3 rounded-xl bg-amber-400/15 p-3 text-xs text-amber-100">
-                As notificações estão bloqueadas ou não são aceitas neste aparelho. Salve o alerta na agenda para receber o
-                aviso.
-              </p>
+              <p className="mt-3 rounded-xl bg-amber-400/15 p-3 text-xs text-amber-100">{t('createdBlocked')}</p>
             )}
           </div>
         ) : (
           <>
-            <p className="mt-5 text-sm font-medium text-white/80">Avisar antes</p>
+            <p className="mt-5 text-sm font-medium text-white/80">{t('notifyBefore')}</p>
             <div className="mt-2 grid grid-cols-4 gap-2">
               {LEAD_OPTIONS.map((m) => (
                 <button
                   key={m}
                   type="button"
                   aria-pressed={lead === m}
-                  aria-label={leadLabel(m)}
+                  aria-label={t('leadBefore', { lead: leadShort(m) })}
                   onClick={() => changeLead(m)}
                   className={`rounded-2xl py-3 text-sm font-medium transition ${
                     lead === m ? 'bg-teal text-navy-dark shadow-lg' : 'bg-white/10 text-white hover:bg-white/15'
@@ -146,7 +136,7 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
             </div>
 
             <label htmlFor="app-alerta-nome" className="mt-4 block text-sm font-medium text-white/80">
-              Nome do alerta
+              {t('alertName')}
             </label>
             <input
               id="app-alerta-nome"
@@ -158,7 +148,7 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
             />
 
             <label htmlFor="app-alerta-obs" className="mt-4 block text-sm font-medium text-white/80">
-              Observação <span className="font-normal text-white/50">(opcional)</span>
+              {t('note')} <span className="font-normal text-white/50">{t('optional')}</span>
             </label>
             <textarea
               id="app-alerta-obs"
@@ -166,17 +156,17 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
               maxLength={300}
               rows={2}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ex.: levar a lancha para a poita"
+              placeholder={t('notePh')}
               className="mt-1 w-full resize-none rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-white/40 focus:border-teal"
             />
 
             <p className="mt-4 text-center text-sm text-white/80">
               {tooLate ? (
-                <span className="text-amber-200">Esse horário já passou. Escolha um tempo menor.</span>
+                <span className="text-amber-200">{t('tooLate')}</span>
               ) : (
                 <>
-                  Aviso <strong className="font-medium text-white">{formatBrazilDay(when)}</strong>, às{' '}
-                  <strong className="font-medium text-white">{formatBrazilTime(when)}</strong>
+                  {t('notifyOn')} <strong className="font-medium text-white">{longDay(when)}</strong>,{' '}
+                  {t('atTime', { time: '' }).trim()} <strong className="font-medium text-white">{time(when)}</strong>
                 </>
               )}
             </p>
@@ -188,7 +178,7 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#e2bd45] py-4 text-sm font-semibold text-navy-dark shadow-lg transition hover:bg-[#f0cd5a] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <BellRing size={18} aria-hidden="true" />
-              {permission === 'default' ? 'Permitir notificações e criar alerta' : 'Criar alerta'}
+              {permission === 'default' ? t('allowAndCreate') : t('createAlert')}
             </button>
           </>
         )}
@@ -200,7 +190,7 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
               onClick={() => setShowCalendar(true)}
               className="w-full text-center text-xs text-white/60 underline-offset-4 hover:underline"
             >
-              Prefiro salvar na agenda
+              {t('preferCalendar')}
             </button>
           )}
           {showCalendar || done ? (
@@ -211,7 +201,7 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
                 rel="noreferrer"
                 className="flex items-center justify-center gap-2 rounded-full border border-white/20 py-3 text-xs text-white hover:bg-white/10"
               >
-                <CalendarPlus size={16} aria-hidden="true" /> Google Agenda
+                <CalendarPlus size={16} aria-hidden="true" /> {t('googleCal')}
               </a>
               <button
                 type="button"
@@ -219,7 +209,7 @@ export default function AppAlertSheet({ target, onClose }: { target: AlertTarget
                 onClick={() => downloadIcs(request)}
                 className="flex items-center justify-center gap-2 rounded-full border border-white/20 py-3 text-xs text-white hover:bg-white/10 disabled:opacity-40"
               >
-                <Download size={16} aria-hidden="true" /> Calendário
+                <Download size={16} aria-hidden="true" /> {t('calendarFile')}
               </button>
             </div>
           ) : null}
