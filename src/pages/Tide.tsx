@@ -3,7 +3,6 @@ import { AlertTriangle, ArrowDown, ArrowUp, ExternalLink, Fish, MapPin, Moon, Re
 import GlassButton from '../components/GlassButton'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
-import { images } from '../data/site'
 import { fetchTides, formatHour } from '../lib/tide'
 import type { TideDay } from '../lib/tide'
 import { levelOf, solunarDay } from '../lib/solunar'
@@ -246,7 +245,7 @@ export default function Tide() {
 
   return (
     <>
-      <PageHero title="TÁBUA DE MARÉ" subtitle="Preia-mares e baixa-mares do Saco da Ribeira" image={images.ubatubaPraia} />
+      <PageHero title="TÁBUA DE MARÉ" subtitle="Preia-mares e baixa-mares do Saco da Ribeira" image="/images/cuidados/ubatuba-aerea.jpg" />
 
       <section className="mx-auto max-w-5xl px-4 py-14 sm:px-6" aria-labelledby="mare-titulo">
         <Reveal className="mb-8 text-center">

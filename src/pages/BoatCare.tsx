@@ -6,12 +6,16 @@ import {
   CupSoda,
   Droplets,
   Glasses,
+  Gauge,
   LifeBuoy,
   MessageCircle,
   Shirt,
   Snowflake,
+  Sparkles,
   Sun,
+  Umbrella,
   Waves,
+  Wrench,
   Zap,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -63,6 +67,16 @@ const topics: CareTopic[] = [
     imageAlt: 'Galão de óleo em um píer com o mar ao fundo',
   },
   {
+    id: 'motor',
+    icon: Gauge,
+    kicker: 'Cuidado com o motor',
+    title: 'É o que requer mais atenção',
+    text: 'Realize a troca de óleo e dos filtros, a limpeza ou a troca de injetores e do tanque de combustível, para manter o bom funcionamento.',
+    bullets: ['Troca de óleo e dos filtros', 'Limpeza ou troca dos injetores', 'Limpeza do tanque de combustível'],
+    image: '/images/cuidados/motor.jpg',
+    imageAlt: 'Motor de popa em destaque, com lanchas atracadas ao fundo',
+  },
+  {
     id: 'eletrica',
     icon: Zap,
     kicker: 'Parte elétrica e casco',
@@ -77,6 +91,43 @@ const topics: CareTopic[] = [
     ],
     image: '/images/cuidados/parte-eletrica.jpg',
     imageAlt: 'Compartimento elétrico de uma embarcação com bateria e módulos',
+  },
+  {
+    id: 'limpeza',
+    icon: Sparkles,
+    kicker: 'Limpeza',
+    title: 'Casco limpo dura mais',
+    text: 'Lave com esponja macia para retirar todo o limo. Para as embarcações que ficam permanentemente dentro d’água, uma dica é pintar o fundo com tinta impermeável, para proteger o casco contra as infiltrações que causam corrosão.',
+    bullets: [
+      'Use esponja macia para não riscar o casco.',
+      'Nos planos da Royal Marine, você tem acesso à limpeza e à estética da parceira WashBoat, dentro da marina.',
+    ],
+    image: '/images/cuidados/limpeza.jpg',
+    imageAlt: 'Popa de uma lancha com plataforma de madeira e escada, sobre o mar calmo',
+  },
+  {
+    id: 'capa',
+    icon: Umbrella,
+    kicker: 'Capa de proteção',
+    title: 'Proteja dentro ou fora d’água',
+    text: 'Use uma capa de tecido impermeável com proteção UV. Ela preserva a pintura, as gaiutas, as vigias e os acrílicos contra o sol e a maresia.',
+    bullets: ['Tecido impermeável', 'Proteção UV', 'Menos desgaste com sol e maresia'],
+    image: '/images/cuidados/capa-protecao.jpg',
+    imageAlt: 'Lancha atracada na marina com capa de proteção escura sobre o cockpit',
+  },
+  {
+    id: 'equipe',
+    icon: Wrench,
+    kicker: 'Manutenção',
+    title: 'Equipe técnica Royal Marine',
+    text: 'A Royal Marine conta com equipe técnica responsável pelo funcionamento e pela análise semanal das embarcações, recomendando manutenção preventiva e corretiva.',
+    bullets: [
+      'Análise semanal do funcionamento',
+      'Ficha exclusiva para cada embarcação',
+      'Recomendação de manutenção preventiva e corretiva',
+    ],
+    image: '/images/cuidados/equipe-tecnica.jpg',
+    imageAlt: 'Técnico da Royal Marine com prancheta, sorrindo, em frente a uma lancha na marina',
   },
   {
     id: 'seguranca',
@@ -115,13 +166,15 @@ export default function BoatCare() {
       <PageHero
         title="CUIDADOS A BORDO"
         subtitle="Dicas para marinheiros particulares e proprietários que conduzem a própria embarcação"
-        image="/images/cuidados/iate-inverno.jpg"
+        image="/images/cuidados/cuidado-estetica.jpg"
       />
 
       {/* Introdução */}
       <section className="mx-auto max-w-3xl px-6 pt-16 text-center" aria-labelledby="cuidados-titulo">
         <Reveal>
-          <p className="font-serif text-sm italic text-teal-dark">Quem cuida, navega mais</p>
+          <p className="font-serif text-sm italic text-teal-dark">
+            Aqui seu sonho tem o cuidado que você confia e que você merece!
+          </p>
           <h2 id="cuidados-titulo" className="mt-2 font-display text-3xl font-light sm:text-4xl">
             Sua embarcação sempre pronta
           </h2>
@@ -209,6 +262,16 @@ export default function BoatCare() {
               O que levar a bordo
             </h2>
             <div className="mx-auto mt-5 h-0.5 w-10 bg-teal" />
+          </Reveal>
+          <Reveal className="mb-8">
+            <figure className="overflow-hidden rounded-3xl shadow-xl">
+              <img
+                src="/images/cuidados/passeio.jpg"
+                alt="Família em um passeio de lancha, com bolsa, óculos de sol, toalha e protetor solar sobre a mesa"
+                loading="lazy"
+                className="aspect-[16/7] w-full object-cover"
+              />
+            </figure>
           </Reveal>
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {checklist.map(({ icon: Icon, title, detail }, i) => (
