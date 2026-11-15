@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import News from './pages/News'
 import NewsPost from './pages/NewsPost'
 import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 import Tide from './pages/Tide'
 import BoatCare from './pages/BoatCare'
 import Weather from './pages/Weather'
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/newpage1" element={<AboutUbatuba />} />
         <Route path="/privacidade" element={<Privacy />} />
+        <Route path="/termos-de-uso" element={<Terms />} />
         <Route path="*" element={<Coming title="PÁGINA NÃO ENCONTRADA" />} />
       </Route>
     </Routes>

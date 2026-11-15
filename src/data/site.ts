@@ -14,7 +14,7 @@ export const menuItems: MenuItem[] = [
 
 export const contact: ContactInfo = {
   name: 'ROYAL MARINE - GARAGEM NÁUTICA',
-  tagline: 'Novo conceito em garagem náutica de Ubatuba!',
+  tagline: 'O lugar mais seguro para a sua embarcação em Ubatuba!',
   addresses: [
     {
       label: 'Recepção',
@@ -50,7 +50,7 @@ export const stats: Stat[] = [
 ]
 
 export const aboutFooter =
-  'Novo conceito em Marina, com 10.000m² de vagas cobertas para até 150 embarcações, vestiários, sistema de alarme e monitoramento 24h da sua embarcação.'
+  'O lugar mais seguro para a sua embarcação em Ubatuba, com 10.000m² de vagas cobertas para até 150 embarcações, vestiários, sistema de alarme e monitoramento 24h da sua embarcação.'
 
 export const images = {
   galpaoInterior: '/images/galpao-interior.jpg',

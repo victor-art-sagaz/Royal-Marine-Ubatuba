@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, ArrowDown, ArrowUp, ExternalLink, Fish, MapPin, Moon, RefreshCw } from 'lucide-react'
+import { AlertTriangle, ArrowDown, ArrowUp, BellPlus, ExternalLink, Fish, MapPin, Moon, RefreshCw } from 'lucide-react'
+import AlertDialog from '../components/AlertDialog'
+import type { AlertTarget } from '../components/AlertDialog'
+import InstallAppButton from '../components/InstallAppButton'
 import GlassButton from '../components/GlassButton'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
@@ -8,6 +11,7 @@ import type { TideDay } from '../lib/tide'
 import { levelOf, solunarDay } from '../lib/solunar'
 import type { ActivityLevel, SolunarDay } from '../lib/solunar'
 import { WEATHER_PLACE } from '../lib/weather'
+import { dateAtBrazilHour } from '../lib/alerts'
 
 /** Página da tábua de marés de Ubatuba no tabuademares.com */
 const TABUA_DE_MARES_URL = 'https://tabuademares.com/br/so-paulo/ubatuba'
@@ -233,6 +237,7 @@ function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: SolunarDa
 export default function Tide() {
   const { state, reload } = useTides()
   const [selected, setSelected] = useState(0)
+  const [alertTarget, setAlertTarget] = useState<AlertTarget | null>(null)
 
   const today = todayInBrazil()
   const days = state.status === 'ready' ? state.days.filter((d) => d.date >= today) : []
@@ -324,6 +329,10 @@ export default function Tide() {
               <Reveal className="md:col-span-2">
                 <div className="h-full rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                   <h3 className="font-display text-lg tracking-wide text-navy">Preia-mares e baixa-mares</h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Toque em <strong className="font-medium">Criar alerta</strong> para ser avisado antes da maré subir ou
+                    descer.
+                  </p>
                   <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {day.extremes.map((e) => {
                       const high = e.type === 'high'
@@ -338,6 +347,27 @@ export default function Tide() {
                           </p>
                           <p className="mt-1 font-display text-2xl font-light">{formatHour(e.hour)}</p>
                           <p className={`text-sm ${high ? 'text-white/80' : 'text-slate-600'}`}>{meters(e.height)}</p>
+                          {dateAtBrazilHour(day.date, e.hour).getTime() > Date.now() ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAlertTarget({
+                                  kind: high ? 'tide-high' : 'tide-low',
+                                  eventAt: dateAtBrazilHour(day.date, e.hour),
+                                  summary: `${high ? 'Preia-mar' : 'Baixa-mar'} às ${formatHour(e.hour)} (${meters(e.height)})`,
+                                })
+                              }
+                              className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition ${
+                                high
+                                  ? 'bg-[#e2bd45] text-navy-dark hover:bg-[#f0cd5a]'
+                                  : 'bg-navy text-white hover:bg-navy-dark'
+                              }`}
+                            >
+                              <BellPlus size={13} aria-hidden="true" /> Criar alerta
+                            </button>
+                          ) : (
+                            <p className={`mt-2 text-xs ${high ? 'text-white/50' : 'text-slate-400'}`}>Já passou</p>
+                          )}
                         </li>
                       )
                     })}
@@ -413,11 +443,13 @@ export default function Tide() {
           </>
         ) : null}
 
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <InstallAppButton />
           <GlassButton href={TABUA_DE_MARES_URL} external tone="dark" icon={<ExternalLink size={16} />}>
             Ver também no tabuademares.com
           </GlassButton>
         </div>
+        <AlertDialog target={alertTarget} onClose={() => setAlertTarget(null)} />
       </section>
     </>
   )

@@ -66,7 +66,7 @@ export const faq: FaqItem[] = [
     question: 'Quanto custa e como faço para reservar uma vaga?',
     icon: MessageCircle,
     answer: [
-      'Temos os planos Mensal Premium, Mensal Basic, Vagas para manutenção, Mensal – Jet Ski e Operações avulsas. Os valores de cada um estão na seção Planos e valores, na Página Inicial e na página Contato.',
+      'Temos os planos Mensal Premium, Mensal Basic, Vagas para manutenção, Mensal – Jet Ski e Operações avulsas. Os valores são sob consulta: fale com a nossa equipe pelo WhatsApp (12) 99775-7520 ou pelo formulário da página Contato.',
       'Quem tem mais de uma lancha, ou um jet ski junto com a lancha, pode ter um desconto especial. A vaga diária depende de disponibilidade.',
       'Para um orçamento, preencha o formulário na página Contato com o nome e o tamanho da sua embarcação, ou chame no WhatsApp (12) 99775-7520.',
     ],

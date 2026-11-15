@@ -6,7 +6,7 @@ import { contact, images } from '../data/site'
 /** Se quiser mostrar o CNPJ na política, escreva aqui, por exemplo: '00.000.000/0001-00'. Vazio = não aparece. */
 const cnpj: string = ''
 
-const updatedAt = '4 de novembro de 2026'
+const updatedAt = '15 de novembro de 2026'
 
 interface PolicySection {
   title: string
@@ -62,7 +62,14 @@ const sections: PolicySection[] = [
     ],
   },
   {
-    title: '7. Serviços de terceiros que aparecem no site',
+    title: '7. App instalável e alertas de maré e tempo',
+    paragraphs: [
+      'Você pode instalar o site no celular como um app (PWA). Para abrir mais rápido e funcionar sem internet, o app guarda no seu aparelho uma cópia dos arquivos do próprio site, como textos, imagens e ícones. Essa cópia não contém dados pessoais e é apagada quando você desinstala o app ou limpa os dados do navegador.',
+      'Os alertas de maré, chuva e vento são criados por você na sua própria agenda (Google Agenda ou calendário do celular). O nome, a observação e o horário do alerta vão direto para a sua agenda: a Royal Marine não recebe nem guarda essas informações. O app não pede permissão de localização nem de notificações.',
+    ],
+  },
+  {
+    title: '8. Serviços de terceiros que aparecem no site',
     paragraphs: [
       'Para funcionar, o site usa serviços de outras empresas. Ao abrir uma página que usa um deles, o seu aparelho se conecta ao serviço, que pode receber o seu endereço de IP e informações técnicas do navegador:',
     ],
@@ -70,25 +77,26 @@ const sections: PolicySection[] = [
       'Google Fonts: carrega as letras (fontes) do site.',
       'Google Maps: mostra o mapa na página Contato.',
       'YouTube: nas notícias com vídeo, a imagem de capa é carregada do YouTube. O vídeo só começa quando você clica, e usa o modo de privacidade ampliada (youtube-nocookie).',
-      'Open-Meteo: fornece a previsão do tempo e do mar da página Previsão do Tempo.',
+      'Open-Meteo: fornece a previsão do tempo, do mar e da maré das páginas Previsão do Tempo e Tábua de Maré.',
+      'Google Agenda: recebe o alerta quando você escolhe salvar nele (segue a política de privacidade do Google).',
       'WhatsApp (Meta): recebe a mensagem que você decidir enviar.',
       'Vercel: empresa que hospeda o site e guarda registros técnicos de acesso, como data, hora e IP, para manter a segurança.',
     ],
   },
   {
-    title: '8. Compartilhamento',
+    title: '9. Compartilhamento',
     paragraphs: [
       'Não vendemos nem alugamos os seus dados. Só os compartilhamos com os serviços acima, quando necessário para o site funcionar, ou se uma lei ou ordem judicial exigir.',
     ],
   },
   {
-    title: '9. Por quanto tempo guardamos',
+    title: '10. Por quanto tempo guardamos',
     paragraphs: [
       'Mantemos as conversas de atendimento pelo tempo necessário para atender você e cumprir obrigações legais. Se você pedir para apagar, apagamos, salvo quando a lei nos obrigar a manter alguma informação.',
     ],
   },
   {
-    title: '10. Seus direitos',
+    title: '11. Seus direitos',
     paragraphs: ['Pela LGPD, você pode pedir a qualquer momento:'],
     bullets: [
       'confirmar se tratamos dados seus e ter acesso a eles;',
@@ -99,13 +107,13 @@ const sections: PolicySection[] = [
     ],
   },
   {
-    title: '11. Segurança',
+    title: '12. Segurança',
     paragraphs: [
       'O site usa conexão segura (HTTPS) e proteções contra ataques comuns. Mesmo assim, nenhum sistema é totalmente livre de riscos. Por isso, nunca envie senhas, números de cartão ou documentos pelo formulário.',
     ],
   },
   {
-    title: '12. Mudanças nesta política',
+    title: '13. Mudanças nesta política',
     paragraphs: [
       `Podemos atualizar esta política quando for preciso. A data da última atualização aparece no topo desta página. Última atualização: ${updatedAt}.`,
     ],
@@ -150,7 +158,7 @@ export default function Privacy() {
 
           <Reveal>
             <div className="rounded-3xl border border-teal/40 bg-teal/10 p-6">
-              <h2 className="font-display text-2xl font-light tracking-wide text-navy">13. Fale com a gente</h2>
+              <h2 className="font-display text-2xl font-light tracking-wide text-navy">14. Fale com a gente</h2>
               <div className="my-3 h-0.5 w-10 bg-teal" />
               <p className="mb-4 font-light leading-relaxed">
                 Para qualquer pedido ou dúvida sobre os seus dados, escreva para a Royal Marine:

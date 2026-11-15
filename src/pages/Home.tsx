@@ -50,10 +50,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-navy-dark/70 via-navy/40 to-navy-dark/80" />
         <div className="relative z-10 mx-auto max-w-4xl">
           <p className="font-serif text-sm italic text-teal sm:text-base">Royal Marine · Garagem Náutica</p>
-          <h1 id="inicio-titulo" className="mt-4 font-display text-4xl font-light leading-tight tracking-wide text-white sm:text-6xl">
-            NOVA GARAGEM NÁUTICA
+          <h1 id="inicio-titulo" className="mt-4 font-display text-3xl font-light leading-tight tracking-wide text-white sm:text-5xl lg:text-6xl">
+            O LUGAR MAIS SEGURO
             <br />
-            DE UBATUBA
+            PARA A SUA EMBARCAÇÃO EM UBATUBA
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base font-light text-white/90 sm:text-lg">
             Cuidamos da sua embarcação para manter o seu sonho em perfeito estado.
@@ -114,7 +114,7 @@ export default function Home() {
       <section className="bg-slate-50 py-20">
         <div className="mx-auto max-w-6xl px-6">
           <Reveal className="mb-12 text-center">
-            <p className="font-serif text-sm italic text-teal-dark">Novo conceito em marina</p>
+            <p className="font-serif text-sm italic text-teal-dark">Royal Marine: segurança e praticidade</p>
             <h2 className="mt-2 font-display text-3xl font-light sm:text-4xl">Tudo para a sua embarcação</h2>
             <div className="mx-auto mt-5 h-0.5 w-10 bg-teal" />
           </Reveal>
