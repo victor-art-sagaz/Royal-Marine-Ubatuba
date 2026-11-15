@@ -65,7 +65,8 @@ const sections: PolicySection[] = [
     title: '7. App instalável e alertas de maré e tempo',
     paragraphs: [
       'Você pode instalar o site no celular como um app (PWA). Para abrir mais rápido e funcionar sem internet, o app guarda no seu aparelho uma cópia dos arquivos do próprio site, como textos, imagens e ícones. Essa cópia não contém dados pessoais e é apagada quando você desinstala o app ou limpa os dados do navegador.',
-      'Os alertas de maré, chuva e vento são criados por você na sua própria agenda (Google Agenda ou calendário do celular). O nome, a observação e o horário do alerta vão direto para a sua agenda: a Royal Marine não recebe nem guarda essas informações. O app não pede permissão de localização nem de notificações.',
+      'No site, os alertas de maré, chuva e vento são salvos por você na sua própria agenda (Google Agenda ou calendário do celular). O nome, a observação e o horário vão direto para a sua agenda: a Royal Marine não recebe essas informações.',
+      'No app, você também pode criar alertas com notificação. Para isso, o app pede a sua permissão para enviar notificações; você pode negar ou desligar a qualquer momento nas configurações do celular. Os alertas do app (nome, observação e horário) ficam guardados somente no seu aparelho e não são enviados à Royal Marine nem a terceiros. O app não pede a sua localização.',
     ],
   },
   {

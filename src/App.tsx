@@ -1,5 +1,9 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import AppShell from './app/AppShell'
+import AppTide from './app/AppTide'
+import AppWeather from './app/AppWeather'
 import Layout from './components/Layout'
+import { isStandalone } from './lib/standalone'
 import About from './pages/About'
 import AboutUbatuba from './pages/AboutUbatuba'
 import Coming from './pages/Coming'
@@ -13,10 +17,24 @@ import Tide from './pages/Tide'
 import BoatCare from './pages/BoatCare'
 import Weather from './pages/Weather'
 
+/** No app instalado, só existem Maré e Tempo: qualquer página do site leva para a Maré */
+function SiteLayout() {
+  return isStandalone() ? <Navigate to="/app/mare" replace /> : <Layout />
+}
+
 export default function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
+      {/* App instalável: interface própria, só Tábua de Maré e Previsão do Tempo */}
+      <Route path="/app" element={<AppShell />}>
+        <Route index element={<Navigate to="/app/mare" replace />} />
+        <Route path="mare" element={<AppTide />} />
+        <Route path="tempo" element={<AppWeather />} />
+        <Route path="*" element={<Navigate to="/app/mare" replace />} />
+      </Route>
+
+      {/* Site */}
+      <Route element={<SiteLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/newpage" element={<Weather />} />
         <Route path="/tabua-de-mare" element={<Tide />} />

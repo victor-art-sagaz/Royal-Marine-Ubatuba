@@ -27,7 +27,8 @@ const sections: TermsSection[] = [
     ],
     bullets: [
       'Não servem para navegação e não substituem as fontes oficiais, como a Marinha do Brasil e a Capitania dos Portos.',
-      'A previsão pode mudar a qualquer momento, e os alertas salvos na sua agenda não são atualizados automaticamente.',
+      'A previsão pode mudar a qualquer momento, e os alertas salvos na agenda ou no app não são atualizados automaticamente.',
+      'As notificações do app dependem do celular: elas aparecem com o app aberto ou em segundo plano, e podem não chegar com o app fechado, em economia de bateria, sem internet ou com as notificações bloqueadas. Para avisos importantes, salve também na agenda.',
       'A decisão de sair para navegar é sempre do condutor da embarcação, que deve avaliar as condições do mar e do tempo no momento e seguir as normas da autoridade marítima.',
       'A Royal Marine não se responsabiliza por decisões tomadas apenas com base nessas estimativas.',
     ],

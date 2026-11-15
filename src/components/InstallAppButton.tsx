@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Download, Share, SquarePlus, X } from 'lucide-react'
+import { isStandalone } from '../lib/standalone'
 
 /** Evento que o Chrome/Android dispara quando o site pode ser instalado como app */
 interface InstallPromptEvent extends Event {
@@ -22,10 +23,6 @@ if (typeof window !== 'undefined') {
   })
 }
 
-const isStandalone = () =>
-  typeof window !== 'undefined' &&
-  (window.matchMedia('(display-mode: standalone)').matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true)
 
 const isIos = () => typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent)
 

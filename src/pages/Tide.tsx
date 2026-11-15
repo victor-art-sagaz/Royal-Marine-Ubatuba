@@ -14,32 +14,32 @@ import { WEATHER_PLACE } from '../lib/weather'
 import { dateAtBrazilHour } from '../lib/alerts'
 
 /** Página da tábua de marés de Ubatuba no tabuademares.com */
-const TABUA_DE_MARES_URL = 'https://tabuademares.com/br/so-paulo/ubatuba'
+export const TABUA_DE_MARES_URL = 'https://tabuademares.com/br/so-paulo/ubatuba'
 
 const NAVY = '#14284b'
 const TEAL = '#74bac5'
 const TEAL_DARK = '#4f9fae'
 
-const levelColor: Record<ActivityLevel, string> = {
+export const levelColor: Record<ActivityLevel, string> = {
   'muito alta': '#0e7466',
   alta: '#4f9fae',
   média: '#9fd0d8',
   baixa: '#d7e3ea',
 }
 
-const meters = (value: number) => `${value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} m`
+export const meters = (value: number) => `${value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} m`
 
 /** Data de hoje no horário de Brasília (AAAA-MM-DD) */
-function todayInBrazil(): string {
+export function todayInBrazil(): string {
   return new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 10)
 }
 
-function nowHourInBrazil(): number {
+export function nowHourInBrazil(): number {
   const d = new Date(Date.now() - 3 * 3600000)
   return d.getUTCHours() + d.getUTCMinutes() / 60
 }
 
-function dayLabel(date: string, index: number) {
+export function dayLabel(date: string, index: number) {
   const d = new Date(`${date}T12:00:00-03:00`)
   const weekday = d.toLocaleDateString('pt-BR', { weekday: 'short', timeZone: 'America/Sao_Paulo' }).replace('.', '')
   const day = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo' })
@@ -50,7 +50,7 @@ function dayLabel(date: string, index: number) {
 
 type TideState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; days: TideDay[] }
 
-function useTides() {
+export function useTides() {
   const [state, setState] = useState<TideState>({ status: 'loading' })
   const [attempt, setAttempt] = useState(0)
 
@@ -109,7 +109,7 @@ function smoothPath(pts: { x: number; y: number }[]) {
   return d
 }
 
-function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: SolunarDay; nowHour: number | null }) {
+export function TideChart({ day, solunar, nowHour }: { day: TideDay; solunar: SolunarDay; nowHour: number | null }) {
   const compact = useCompact()
   const W = compact ? 420 : 720
   const xOf = (hour: number) => PAD_L + (hour / 24) * (W - PAD_L - PAD_R)
