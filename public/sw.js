@@ -4,7 +4,7 @@
  * - NÃO guarda dados pessoais e NÃO intercepta outros sites (previsão, mapas, WhatsApp, Google).
  * - Para forçar todos a receberem uma versão nova do cache, aumente o número de VERSION.
  */
-const VERSION = 'v1'
+const VERSION = 'v2'
 const CACHE = `royal-marine-${VERSION}`
 const PRECACHE = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png']
 
@@ -81,4 +81,22 @@ self.addEventListener('fetch', (event) => {
       ),
     )
   }
+})
+
+// Toque na notificação: abre (ou traz para frente) o app na tela certa
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const path = (event.notification.data && event.notification.data.url) || '/app/mare'
+  const target = new URL(path, self.location.origin).href
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.includes('/app') && 'focus' in client) {
+          client.navigate(target)
+          return client.focus()
+        }
+      }
+      return self.clients.openWindow(target)
+    }),
+  )
 })

@@ -1,25 +1,61 @@
 {
   "name": "Royal Marine - Garagem Náutica",
   "short_name": "Royal Marine",
-  "description": "Tábua de maré, previsão do tempo e alertas para quem navega em Ubatuba. Royal Marine - Garagem Náutica.",
+  "description": "Tábua de maré e previsão do tempo de Ubatuba, com alertas no celular. App da Royal Marine - Garagem Náutica.",
   "id": "/",
-  "start_url": "/tabua-de-mare?origem=app",
+  "start_url": "/app/mare",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#0a1a33",
   "theme_color": "#14284b",
   "lang": "pt-BR",
   "dir": "ltr",
-  "categories": ["weather", "travel", "sports"],
+  "categories": [
+    "weather",
+    "travel",
+    "sports"
+  ],
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Tábua de Maré", "url": "/tabua-de-mare", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Previsão do Tempo", "url": "/newpage", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Planos e valores", "url": "/#valores", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Tábua de Maré",
+      "url": "/app/mare",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Previsão do Tempo",
+      "url": "/app/tempo",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

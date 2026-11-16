@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchWeather } from './weather'
-import type { WeatherBundle } from './weather'
+import { fetchWeather, WEATHER_PLACE } from './weather'
+import type { Place, WeatherBundle } from './weather'
 
 type WeatherState =
   | { status: 'loading' }
@@ -10,7 +10,7 @@ type WeatherState =
 const REFRESH_MS = 15 * 60 * 1000
 
 /** Busca a previsão e atualiza sozinho a cada 15 minutos. */
-export function useWeather() {
+export function useWeather(place: Place = WEATHER_PLACE) {
   const [state, setState] = useState<WeatherState>({ status: 'loading' })
   const [attempt, setAttempt] = useState(0)
 
@@ -19,7 +19,7 @@ export function useWeather() {
 
     async function load() {
       try {
-        const data = await fetchWeather(controller.signal)
+        const data = await fetchWeather(controller.signal, place)
         setState({ status: 'ready', data })
       } catch {
         if (controller.signal.aborted) return
@@ -34,7 +34,8 @@ export function useWeather() {
       controller.abort()
       window.clearInterval(timer)
     }
-  }, [attempt])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attempt, place.lat, place.lon])
 
   const reload = useCallback(() => {
     setState({ status: 'loading' })

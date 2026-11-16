@@ -1,4 +1,5 @@
-import { WEATHER_PLACE } from './weather'
+import { WEATHER_PLACE, seaPoints } from './weather'
+import type { Place } from './weather'
 
 /**
  * Maré do Saco da Ribeira (Ubatuba) a partir da previsão gratuita da Open-Meteo
@@ -34,12 +35,6 @@ interface MarineTideResponse {
   hourly?: { time: string[]; sea_level_height_msl: (number | null)[] }
 }
 
-/** Pontos tentados em ordem: em frente ao Saco da Ribeira e, se faltar dado, um pouco mais ao largo. */
-const TIDE_POINTS = [
-  { lat: WEATHER_PLACE.lat, lon: WEATHER_PLACE.lon },
-  { lat: -23.45, lon: -45.05 },
-  { lat: -23.52, lon: -45.0 },
-]
 
 const FORECAST_DAYS = 7
 
@@ -89,10 +84,11 @@ function findExtremes(series: { time: string; height: number }[]) {
   return result
 }
 
-export async function fetchTides(signal?: AbortSignal): Promise<TideDay[]> {
+export async function fetchTides(signal?: AbortSignal, place: Place = WEATHER_PLACE): Promise<TideDay[]> {
   let series: { time: string; height: number }[] | null = null
   let lastError: unknown = null
-  for (const point of TIDE_POINTS) {
+  // Pontos tentados em ordem: em frente ao lugar e, se faltar dado, um pouco mais ao largo
+  for (const point of seaPoints(place)) {
     try {
       series = await fetchSeries(point.lat, point.lon, signal)
       break
