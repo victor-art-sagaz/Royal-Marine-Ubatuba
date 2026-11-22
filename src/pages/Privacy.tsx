@@ -6,7 +6,7 @@ import { contact, images } from '../data/site'
 /** Se quiser mostrar o CNPJ na política, escreva aqui, por exemplo: '00.000.000/0001-00'. Vazio = não aparece. */
 const cnpj: string = ''
 
-const updatedAt = '15 de novembro de 2026'
+const updatedAt = '22 de novembro de 2026'
 
 interface PolicySection {
   title: string
@@ -70,7 +70,18 @@ const sections: PolicySection[] = [
     ],
   },
   {
-    title: '8. Serviços de terceiros que aparecem no site',
+    title: '8. Mural de fotos do app',
+    paragraphs: [
+      'No Mural do app, os clientes podem publicar fotos do mar e da marina. Para publicar ou denunciar uma foto, é preciso entrar com a conta Google. Para ver as fotos, não é preciso entrar.',
+      'Ao entrar com o Google, guardamos apenas o seu nome, o seu e-mail e a data do último acesso. O e-mail não aparece para ninguém no Mural: aparece só o apelido que você escolher. Não pedimos CPF, telefone, endereço nem a sua localização.',
+      'Antes de enviar, o próprio app diminui o tamanho da foto e apaga os dados escondidos nela, como a localização do GPS do celular.',
+      'Todas as publicações, fotos e denúncias são apagadas automaticamente todos os dias às 23:59 (horário de Brasília). Contas que ficam 30 dias sem entrar também são apagadas. Você pode apagar as suas fotos a qualquer momento e, no próprio Mural, apagar a sua conta e todos os seus dados com um toque.',
+      'Para manter o Mural seguro, uma foto denunciada por 3 pessoas fica escondida até a equipe da Royal Marine revisar. A equipe pode apagar fotos que desrespeitem as regras dos Termos de Uso.',
+      'Os dados do Mural ficam guardados no Supabase, empresa de banco de dados com conexão segura e regras de acesso que impedem que uma pessoa altere ou apague o que é de outra. O login é feito pelo Google, que segue a política de privacidade dele.',
+    ],
+  },
+  {
+    title: '9. Serviços de terceiros que aparecem no site',
     paragraphs: [
       'Para funcionar, o site usa serviços de outras empresas. Ao abrir uma página que usa um deles, o seu aparelho se conecta ao serviço, que pode receber o seu endereço de IP e informações técnicas do navegador:',
     ],
@@ -82,22 +93,24 @@ const sections: PolicySection[] = [
       'Google Agenda: recebe o alerta quando você escolhe salvar nele (segue a política de privacidade do Google).',
       'WhatsApp (Meta): recebe a mensagem que você decidir enviar.',
       'Vercel: empresa que hospeda o site e guarda registros técnicos de acesso, como data, hora e IP, para manter a segurança.',
+      'Supabase: guarda as fotos e as publicações do Mural do app até a limpeza diária das 23:59.',
+      'Google (login): confirma quem você é quando você entra no Mural do app.',
     ],
   },
   {
-    title: '9. Compartilhamento',
+    title: '10. Compartilhamento',
     paragraphs: [
       'Não vendemos nem alugamos os seus dados. Só os compartilhamos com os serviços acima, quando necessário para o site funcionar, ou se uma lei ou ordem judicial exigir.',
     ],
   },
   {
-    title: '10. Por quanto tempo guardamos',
+    title: '11. Por quanto tempo guardamos',
     paragraphs: [
       'Mantemos as conversas de atendimento pelo tempo necessário para atender você e cumprir obrigações legais. Se você pedir para apagar, apagamos, salvo quando a lei nos obrigar a manter alguma informação.',
     ],
   },
   {
-    title: '11. Seus direitos',
+    title: '12. Seus direitos',
     paragraphs: ['Pela LGPD, você pode pedir a qualquer momento:'],
     bullets: [
       'confirmar se tratamos dados seus e ter acesso a eles;',
@@ -108,13 +121,13 @@ const sections: PolicySection[] = [
     ],
   },
   {
-    title: '12. Segurança',
+    title: '13. Segurança',
     paragraphs: [
       'O site usa conexão segura (HTTPS) e proteções contra ataques comuns. Mesmo assim, nenhum sistema é totalmente livre de riscos. Por isso, nunca envie senhas, números de cartão ou documentos pelo formulário.',
     ],
   },
   {
-    title: '13. Mudanças nesta política',
+    title: '14. Mudanças nesta política',
     paragraphs: [
       `Podemos atualizar esta política quando for preciso. A data da última atualização aparece no topo desta página. Última atualização: ${updatedAt}.`,
     ],
@@ -159,7 +172,7 @@ export default function Privacy() {
 
           <Reveal>
             <div className="rounded-3xl border border-teal/40 bg-teal/10 p-6">
-              <h2 className="font-display text-2xl font-light tracking-wide text-navy">14. Fale com a gente</h2>
+              <h2 className="font-display text-2xl font-light tracking-wide text-navy">15. Fale com a gente</h2>
               <div className="my-3 h-0.5 w-10 bg-teal" />
               <p className="mb-4 font-light leading-relaxed">
                 Para qualquer pedido ou dúvida sobre os seus dados, escreva para a Royal Marine:

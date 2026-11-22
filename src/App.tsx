@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import AppShell from './app/AppShell'
 import AppTide from './app/AppTide'
 import AppWeather from './app/AppWeather'
+import AppFeed from './app/AppFeed'
 import Layout from './components/Layout'
 import { isStandalone } from './lib/standalone'
 import About from './pages/About'
@@ -30,6 +31,7 @@ export default function App() {
         <Route index element={<Navigate to="/app/mare" replace />} />
         <Route path="mare" element={<AppTide />} />
         <Route path="tempo" element={<AppWeather />} />
+        <Route path="mural" element={<AppFeed />} />
         <Route path="*" element={<Navigate to="/app/mare" replace />} />
       </Route>
 

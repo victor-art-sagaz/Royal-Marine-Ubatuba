@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { Bell, BellOff, BellRing, CloudSun, Globe, Trash2, Waves, X } from 'lucide-react'
+import { Bell, BellOff, BellRing, CloudSun, Globe, Trash2, Waves, X, Camera } from 'lucide-react'
 import { LogoAnchor } from '../components/Logo'
 import InstallAppButton from '../components/InstallAppButton'
 import {
@@ -17,6 +17,7 @@ import { LanguageSheet } from './AppExtras'
 const tabs = [
   { to: '/app/mare', key: 'tabTide' as const, icon: Waves },
   { to: '/app/tempo', key: 'tabWeather' as const, icon: CloudSun },
+  { to: '/app/mural', key: 'feedTab' as const, icon: Camera },
 ]
 
 /** Ondas desenhadas que correm no fundo do app */
