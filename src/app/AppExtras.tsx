@@ -241,7 +241,7 @@ export function WeatherDetails({ data }: { data: WeatherBundle }) {
           <p className="text-xs text-white/70">
             {t('comesFrom', { dir: dir(current.windDirection), deg: round(current.windDirection) })}
           </p>
-          <p className="text-xs text-teal">{t('gustsOf', { v: round(current.windGusts) })}</p>
+          {current.windGusts != null ? <p className="text-xs text-teal">{t('gustsOf', { v: round(current.windGusts) })}</p> : null}
         </div>
       </div>
 

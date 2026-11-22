@@ -97,7 +97,7 @@ function NowCard({ data, onReload }: { data: WeatherBundle; onReload: () => void
           </span>
         </Detail>
         <Detail icon={<Wind size={14} aria-hidden="true" />} label="Rajadas">
-          {round(current.windGusts)} <span className="text-sm text-white/70">km/h</span>
+          {current.windGusts != null ? round(current.windGusts) : '–'} <span className="text-sm text-white/70">km/h</span>
         </Detail>
         <Detail icon={<Droplets size={14} aria-hidden="true" />} label="Umidade">
           {round(current.humidity)}
@@ -116,7 +116,7 @@ function NowCard({ data, onReload }: { data: WeatherBundle; onReload: () => void
 
 function SeaSection({ data }: { data: WeatherBundle }) {
   const { marine, current } = data
-  const level = seaLevel(marine?.waveHeight ?? null, current.windGusts)
+  const level = seaLevel(marine?.waveHeight ?? null, current.windGusts ?? current.windSpeed)
   const levelStyle: Record<typeof level, string> = {
     calmo: 'border-emerald-300/40 bg-emerald-400/15 text-emerald-100',
     moderado: 'border-amber-300/40 bg-amber-400/15 text-amber-100',
@@ -518,11 +518,15 @@ export default function Weather() {
             </GlassButton>
           </div>
           <p className="text-xs text-slate-500">
-            Dados meteorológicos por{' '}
-            <a href="https://open-meteo.com/" target="_blank" rel="noreferrer" className="underline hover:text-navy">
-              Open-Meteo.com
+            Previsão do tempo por{' '}
+            <a href="https://www.met.no/en" target="_blank" rel="noreferrer" className="underline hover:text-navy">
+              MET Norway
+            </a>{' '}
+            (licença CC BY 4.0) e previsão de ondas por{' '}
+            <a href="https://www.cptec.inpe.br/" target="_blank" rel="noreferrer" className="underline hover:text-navy">
+              CPTEC/INPE
             </a>
-            . Atualizados automaticamente a cada 15 minutos.
+            . Atualizados a cada 3 horas.
           </p>
         </div>
       </section>

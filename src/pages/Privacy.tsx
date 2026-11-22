@@ -6,7 +6,7 @@ import { contact, images } from '../data/site'
 /** Se quiser mostrar o CNPJ na política, escreva aqui, por exemplo: '00.000.000/0001-00'. Vazio = não aparece. */
 const cnpj: string = ''
 
-const updatedAt = '15 de novembro de 2026'
+const updatedAt = '22 de novembro de 2026'
 
 interface PolicySection {
   title: string
@@ -78,10 +78,11 @@ const sections: PolicySection[] = [
       'Google Fonts: carrega as letras (fontes) do site.',
       'Google Maps: mostra o mapa na página Contato.',
       'YouTube: nas notícias com vídeo, a imagem de capa é carregada do YouTube. O vídeo só começa quando você clica, e usa o modo de privacidade ampliada (youtube-nocookie).',
-      'Open-Meteo: fornece a previsão do tempo, do mar e da maré das páginas Previsão do Tempo e Tábua de Maré.',
+      'MET Norway (Instituto de Meteorologia da Noruega) e CPTEC/INPE: fornecem a previsão do tempo e das ondas. O pedido passa antes pelo nosso servidor na Cloudflare, então esses serviços não recebem o seu endereço de internet (IP).',
+      'Instituto Oceanográfico da USP: autor da tábua de marés de Ubatuba que usamos (os dados ficam dentro do próprio site).',
       'Google Agenda: recebe o alerta quando você escolhe salvar nele (segue a política de privacidade do Google).',
       'WhatsApp (Meta): recebe a mensagem que você decidir enviar.',
-      'Vercel: empresa que hospeda o site e guarda registros técnicos de acesso, como data, hora e IP, para manter a segurança.',
+      'Cloudflare: empresa que hospeda o site e guarda registros técnicos de acesso, como data, hora e IP, para manter a segurança.',
     ],
   },
   {

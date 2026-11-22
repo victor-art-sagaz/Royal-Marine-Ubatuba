@@ -1,6 +1,6 @@
 /**
  * Previsão do tempo e do mar para Ubatuba (Saco da Ribeira).
- * Fonte dos dados: Open-Meteo.com (gratuito, sem chave de acesso).
+ * Fontes dos dados: MET Norway (tempo, CC BY 4.0) e CPTEC/INPE (ondas), pelo intermediário em /functions/api.
  * Para trocar de fonte no futuro (ex.: Google Weather API), basta mexer neste arquivo.
  */
 
@@ -50,7 +50,8 @@ export interface CurrentWeather {
   isDay: boolean
   windSpeed: number
   windDirection: number
-  windGusts: number
+  /** Rajadas (km/h) — nem sempre disponível */
+  windGusts: number | null
   /** Cobertura de nuvens (%) */
   cloudCover?: number
   /** Visibilidade (metros) */
@@ -98,55 +99,54 @@ export interface WeatherBundle {
   fetchedAt: Date
 }
 
-interface ForecastResponse {
-  current: {
-    time: string
-    temperature_2m: number
-    relative_humidity_2m: number
-    apparent_temperature: number
-    precipitation: number
-    weather_code: number
-    wind_speed_10m: number
-    wind_direction_10m: number
-    wind_gusts_10m: number
-    is_day: number
-    cloud_cover?: number
-    visibility?: number
-    dew_point_2m?: number
-    uv_index?: number
-  }
-  hourly: {
-    time: string[]
-    temperature_2m: number[]
-    precipitation_probability: (number | null)[]
-    weather_code: number[]
-    wind_speed_10m: number[]
-    is_day: number[]
-  }
-  daily: {
-    time: string[]
-    weather_code: number[]
-    temperature_2m_max: number[]
-    temperature_2m_min: number[]
-    precipitation_probability_max: (number | null)[]
-    wind_speed_10m_max: number[]
-    sunrise: string[]
-    sunset: string[]
-    uv_index_max: (number | null)[]
+/* =====================================================================
+ * Fontes gratuitas (via intermediário na Cloudflare, ver pasta /functions/api):
+ *   • Tempo: MET Norway (Instituto de Meteorologia da Noruega) — CC BY 4.0
+ *   • Ondas: CPTEC/INPE (governo brasileiro)
+ * ===================================================================== */
+
+interface MetDetails {
+  air_temperature?: number
+  relative_humidity?: number
+  wind_speed?: number
+  wind_speed_of_gust?: number
+  wind_from_direction?: number
+  cloud_area_fraction?: number
+  dew_point_temperature?: number
+  fog_area_fraction?: number
+  ultraviolet_index_clear_sky?: number
+}
+
+interface MetPeriod {
+  summary?: { symbol_code?: string }
+  details?: {
+    precipitation_amount?: number
+    probability_of_precipitation?: number
+    air_temperature_max?: number
+    air_temperature_min?: number
   }
 }
 
-interface MarineResponse {
-  current?: {
-    wave_height?: number | null
-    wave_direction?: number | null
-    wave_period?: number | null
-    sea_surface_temperature?: number | null
+interface MetStep {
+  time: string
+  data: {
+    instant: { details: MetDetails }
+    next_1_hours?: MetPeriod
+    next_6_hours?: MetPeriod
+    next_12_hours?: MetPeriod
   }
-  daily?: {
-    time: string[]
-    wave_height_max?: (number | null)[]
-  }
+}
+
+interface MetResponse {
+  properties: { timeseries: MetStep[] }
+}
+
+export interface WaveItem {
+  /** Hora em UTC (ISO) */
+  hora: string
+  altura: number | null
+  direcao: number | null
+  agitacao: string | null
 }
 
 async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
@@ -155,112 +155,192 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   return (await response.json()) as T
 }
 
-/** Pontos do mar perto do lugar (o modelo de ondas às vezes não tem dado colado na praia) */
+/** Pontos do mar perto do lugar */
 export function seaPoints(place: Place): Place[] {
-  return [
-    place,
-    { ...place, lat: place.lat - 0.04, lon: place.lon + 0.04 },
-    { ...place, lat: -23.55, lon: -45.0 },
-  ]
+  return [place]
 }
 
-async function fetchMarineAt(place: Place, signal?: AbortSignal): Promise<MarineResponse | null> {
-  const base = `https://marine-api.open-meteo.com/v1/marine?latitude=${place.lat}&longitude=${place.lon}&daily=wave_height_max&timezone=America%2FSao_Paulo&forecast_days=7`
+/** Previsão do tempo do MET Norway para o lugar (guardada 3 h pela Cloudflare) */
+export function fetchMet(place: Place, signal?: AbortSignal) {
+  return getJson<MetResponse>(`/api/tempo?lat=${place.lat.toFixed(2)}&lon=${place.lon.toFixed(2)}`, signal)
+}
+
+/** Previsão de ondas de Ubatuba do CPTEC/INPE (guardada 3 h pela Cloudflare) */
+export async function fetchWaves(signal?: AbortSignal): Promise<WaveItem[]> {
   try {
-    return await getJson<MarineResponse>(
-      `${base}&current=wave_height,wave_direction,wave_period,sea_surface_temperature`,
-      signal,
-    )
+    const data = await getJson<{ itens?: WaveItem[] }>('/api/ondas', signal)
+    return data.itens ?? []
   } catch {
-    if (signal?.aborted) return null
-    try {
-      // Tenta de novo só com as ondas (a temperatura da água pode não existir para este ponto)
-      return await getJson<MarineResponse>(`${base}&current=wave_height,wave_direction,wave_period`, signal)
-    } catch {
-      return null
-    }
+    return []
   }
 }
 
-async function fetchMarine(place: Place, signal?: AbortSignal): Promise<MarineResponse | null> {
-  for (const point of seaPoints(place)) {
-    const data = await fetchMarineAt(point, signal)
-    if (data?.current && typeof data.current.wave_height === 'number') return data
-    if (signal?.aborted) return null
+/** Hora UTC (ISO) → hora de Brasília "AAAA-MM-DDTHH:mm" */
+export const toBrazilLocal = (iso: string) => new Date(Date.parse(iso) - 3 * 3600000).toISOString().slice(0, 16)
+
+/** Converte o ícone do MET Norway no código de tempo que o site já usa */
+export function metSymbolToCode(symbol?: string): number {
+  const s = (symbol ?? '').replace(/_(day|night|polartwilight)$/, '')
+  if (!s) return 3
+  if (s.includes('thunder')) return 95
+  if (s.includes('snow')) return 73
+  if (s.includes('sleet')) return 67
+  if (s.includes('rainshowers')) return s.startsWith('light') ? 80 : s.startsWith('heavy') ? 82 : 81
+  if (s.includes('rain')) return s.startsWith('light') ? 61 : s.startsWith('heavy') ? 65 : 63
+  if (s === 'fog') return 45
+  if (s === 'cloudy') return 3
+  if (s === 'partlycloudy') return 2
+  if (s === 'fair') return 1
+  return 0
+}
+
+/** Nascer e pôr do sol (hora de Brasília, "AAAA-MM-DDTHH:mm") — fórmula da NOAA */
+export function sunTimes(date: string, lat: number, lon: number): { sunrise: string; sunset: string } {
+  const d = new Date(`${date}T12:00:00Z`)
+  const start = Date.UTC(d.getUTCFullYear(), 0, 0)
+  const dayOfYear = Math.floor((d.getTime() - start) / 86400000)
+  const g = ((2 * Math.PI) / 365) * (dayOfYear - 1)
+  const eq =
+    229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g))
+  const decl =
+    0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g) -
+    0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g)
+  const rad = (x: number) => (x * Math.PI) / 180
+  const cosHa = Math.cos(rad(90.833)) / (Math.cos(rad(lat)) * Math.cos(decl)) - Math.tan(rad(lat)) * Math.tan(decl)
+  const ha = (Math.acos(Math.max(-1, Math.min(1, cosHa))) * 180) / Math.PI
+  const toLocal = (utcMinutes: number) => {
+    const local = Math.round(utcMinutes - 180)
+    const h = Math.floor(local / 60)
+    const m = local % 60
+    return `${date}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
   }
-  return null
+  return { sunrise: toLocal(720 - 4 * (lon + ha) - eq), sunset: toLocal(720 - 4 * (lon - ha) - eq) }
+}
+
+/** Sensação térmica (fórmula de Steadman, com vento em m/s) */
+function apparentTemp(t: number, rh: number, windMs: number) {
+  const e = (rh / 100) * 6.105 * Math.exp((17.27 * t) / (237.7 + t))
+  return t + 0.33 * e - 0.7 * windMs - 4
+}
+
+/** Chance de chuva: usa a do MET Norway; se não vier, estima pela quantidade prevista */
+function rainChance(p?: MetPeriod, hours = 1) {
+  const prob = p?.details?.probability_of_precipitation
+  if (typeof prob === 'number') return prob
+  const perHour = (p?.details?.precipitation_amount ?? 0) / hours
+  if (perHour >= 1) return 90
+  if (perHour >= 0.5) return 70
+  if (perHour >= 0.2) return 50
+  if (perHour > 0) return 30
+  return 0
+}
+
+const isDayAt = (symbol: string | undefined, local: string, lat: number, lon: number) => {
+  if (symbol?.endsWith('_night')) return false
+  if (symbol?.endsWith('_day')) return true
+  const { sunrise, sunset } = sunTimes(local.slice(0, 10), lat, lon)
+  return local >= sunrise && local < sunset
 }
 
 export async function fetchWeather(signal?: AbortSignal, place: Place = WEATHER_PLACE): Promise<WeatherBundle> {
-  const forecastUrl =
-    `https://api.open-meteo.com/v1/forecast?latitude=${place.lat}&longitude=${place.lon}` +
-    '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,cloud_cover,visibility,dew_point_2m,uv_index' +
-    '&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,is_day' +
-    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset,uv_index_max' +
-    '&timezone=America%2FSao_Paulo&forecast_days=7&wind_speed_unit=kmh'
+  const [met, waves] = await Promise.all([fetchMet(place, signal), fetchWaves(signal)])
+  const steps = met.properties.timeseries
+  const kmh = (ms?: number) => (ms ?? 0) * 3.6
 
-  const [forecast, marineRaw] = await Promise.all([getJson<ForecastResponse>(forecastUrl, signal), fetchMarine(place, signal)])
-
+  // "Agora" = o passo mais recente que já começou
+  const now = Date.now()
+  let idx = 0
+  steps.forEach((s, i) => {
+    if (Date.parse(s.time) <= now) idx = i
+  })
+  const cur = steps[idx]
+  const d = cur.data.instant.details
+  const curLocal = toBrazilLocal(cur.time)
+  const curSymbol = cur.data.next_1_hours?.summary?.symbol_code ?? cur.data.next_6_hours?.summary?.symbol_code
+  const temp = d.air_temperature ?? 0
   const current: CurrentWeather = {
-    time: forecast.current.time,
-    temperature: forecast.current.temperature_2m,
-    apparent: forecast.current.apparent_temperature,
-    humidity: forecast.current.relative_humidity_2m,
-    precipitation: forecast.current.precipitation,
-    code: forecast.current.weather_code,
-    isDay: forecast.current.is_day === 1,
-    windSpeed: forecast.current.wind_speed_10m,
-    windDirection: forecast.current.wind_direction_10m,
-    windGusts: forecast.current.wind_gusts_10m,
-    cloudCover: forecast.current.cloud_cover,
-    visibility: forecast.current.visibility,
-    dewPoint: forecast.current.dew_point_2m,
-    uvIndex: forecast.current.uv_index,
+    time: curLocal,
+    temperature: temp,
+    apparent: apparentTemp(temp, d.relative_humidity ?? 70, d.wind_speed ?? 0),
+    humidity: d.relative_humidity ?? 0,
+    precipitation: cur.data.next_1_hours?.details?.precipitation_amount ?? 0,
+    code: metSymbolToCode(curSymbol),
+    isDay: isDayAt(curSymbol, curLocal, place.lat, place.lon),
+    windSpeed: kmh(d.wind_speed),
+    windDirection: d.wind_from_direction ?? 0,
+    windGusts: typeof d.wind_speed_of_gust === 'number' ? kmh(d.wind_speed_of_gust) : null,
+    cloudCover: d.cloud_area_fraction,
+    dewPoint: d.dew_point_temperature,
+    uvIndex: d.ultraviolet_index_clear_sky,
   }
 
-  // Próximas 24 horas, a partir da hora atual
-  const currentHour = `${forecast.current.time.slice(0, 13)}:00`
-  const start = Math.max(0, forecast.hourly.time.findIndex((t) => t >= currentHour))
-  const hourly: HourlyPoint[] = forecast.hourly.time.slice(start, start + 24).map((time, i) => {
-    const index = start + i
+  // Próximas 24 horas (passos de 1 hora)
+  const hourly: HourlyPoint[] = steps
+    .slice(idx)
+    .filter((s) => s.data.next_1_hours)
+    .slice(0, 24)
+    .map((s) => {
+      const local = toBrazilLocal(s.time)
+      const symbol = s.data.next_1_hours?.summary?.symbol_code
+      return {
+        time: local,
+        temperature: s.data.instant.details.air_temperature ?? 0,
+        precipProb: rainChance(s.data.next_1_hours, 1),
+        code: metSymbolToCode(symbol),
+        windSpeed: kmh(s.data.instant.details.wind_speed),
+        isDay: isDayAt(symbol, local, place.lat, place.lon),
+      }
+    })
+
+  // Ondas: maior altura de cada dia
+  const waveByDate = new Map<string, number>()
+  waves.forEach((w) => {
+    if (w.altura == null) return
+    const date = toBrazilLocal(w.hora).slice(0, 10)
+    waveByDate.set(date, Math.max(waveByDate.get(date) ?? 0, w.altura))
+  })
+
+  // Próximos 7 dias
+  const dates = Array.from(new Set(steps.map((s) => toBrazilLocal(s.time).slice(0, 10)))).slice(0, 7)
+  const daily: DailyPoint[] = dates.map((date) => {
+    const day = steps.filter((s) => toBrazilLocal(s.time).startsWith(date))
+    const temps = day.flatMap((s) => [
+      s.data.instant.details.air_temperature,
+      s.data.next_6_hours?.details?.air_temperature_max,
+      s.data.next_6_hours?.details?.air_temperature_min,
+    ]).filter((v): v is number => typeof v === 'number')
+    // Ícone do dia: o mais perto do meio-dia
+    const noon = day.reduce<MetStep | null>((best, s) => {
+      const h = Number(toBrazilLocal(s.time).slice(11, 13))
+      const bh = best ? Number(toBrazilLocal(best.time).slice(11, 13)) : 99
+      return Math.abs(h - 12) < Math.abs(bh - 12) ? s : best
+    }, null)
+    const noonSymbol = noon?.data.next_6_hours?.summary?.symbol_code ?? noon?.data.next_1_hours?.summary?.symbol_code
+    const sun = sunTimes(date, place.lat, place.lon)
     return {
-      time,
-      temperature: forecast.hourly.temperature_2m[index],
-      precipProb: forecast.hourly.precipitation_probability[index] ?? 0,
-      code: forecast.hourly.weather_code[index],
-      windSpeed: forecast.hourly.wind_speed_10m[index],
-      isDay: forecast.hourly.is_day[index] === 1,
+      date,
+      code: metSymbolToCode(noonSymbol),
+      tMax: temps.length ? Math.max(...temps) : 0,
+      tMin: temps.length ? Math.min(...temps) : 0,
+      precipProbMax: Math.max(
+        0,
+        ...day.map((s) => (s.data.next_1_hours ? rainChance(s.data.next_1_hours, 1) : rainChance(s.data.next_6_hours, 6))),
+      ),
+      windMax: Math.max(0, ...day.map((s) => kmh(s.data.instant.details.wind_speed))),
+      sunrise: sun.sunrise,
+      sunset: sun.sunset,
+      uvMax: Math.max(0, ...day.map((s) => s.data.instant.details.ultraviolet_index_clear_sky ?? 0)),
+      waveMax: waveByDate.get(date) ?? null,
     }
   })
 
-  const waveByDate = new Map<string, number | null>()
-  marineRaw?.daily?.time.forEach((date, i) => {
-    waveByDate.set(date, marineRaw.daily?.wave_height_max?.[i] ?? null)
-  })
-
-  const daily: DailyPoint[] = forecast.daily.time.map((date, i) => ({
-    date,
-    code: forecast.daily.weather_code[i],
-    tMax: forecast.daily.temperature_2m_max[i],
-    tMin: forecast.daily.temperature_2m_min[i],
-    precipProbMax: forecast.daily.precipitation_probability_max[i] ?? 0,
-    windMax: forecast.daily.wind_speed_10m_max[i],
-    sunrise: forecast.daily.sunrise[i],
-    sunset: forecast.daily.sunset[i],
-    uvMax: forecast.daily.uv_index_max[i] ?? 0,
-    waveMax: waveByDate.get(date) ?? null,
-  }))
-
-  const marineCurrent = marineRaw?.current
-  const marine: MarineNow | null =
-    marineCurrent && typeof marineCurrent.wave_height === 'number'
-      ? {
-          waveHeight: marineCurrent.wave_height ?? null,
-          wavePeriod: marineCurrent.wave_period ?? null,
-          waveDirection: marineCurrent.wave_direction ?? null,
-          seaTemp: marineCurrent.sea_surface_temperature ?? null,
-        }
-      : null
+  // Ondas agora: a previsão mais próxima do momento atual
+  const nearest = waves
+    .filter((w) => w.altura != null)
+    .sort((a, b) => Math.abs(Date.parse(a.hora) - now) - Math.abs(Date.parse(b.hora) - now))[0]
+  const marine: MarineNow | null = nearest
+    ? { waveHeight: nearest.altura, wavePeriod: null, waveDirection: nearest.direcao, seaTemp: null }
+    : null
 
   return { current, hourly, daily, marine, fetchedAt: new Date() }
 }

@@ -4,7 +4,7 @@ import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
 import { contact, images } from '../data/site'
 
-const updatedAt = '15 de novembro de 2026'
+const updatedAt = '22 de novembro de 2026'
 
 interface TermsSection {
   title: string
@@ -23,7 +23,7 @@ const sections: TermsSection[] = [
   {
     title: '2. Tábua de maré, previsão do tempo e alertas',
     paragraphs: [
-      'As informações de maré, tempo, vento, ondas e atividade dos peixes são estimativas feitas por modelos de previsão de serviços externos (Open-Meteo) e por cálculos astronômicos. Elas servem para planejar passeios e pescarias.',
+      'As informações de maré, tempo, vento, ondas e atividade dos peixes são estimativas: a maré vem da tábua de Ubatuba do Instituto Oceanográfico da USP, o tempo do MET Norway, as ondas do CPTEC/INPE e a atividade dos peixes de cálculos astronômicos. Elas servem para planejar passeios e pescarias.',
     ],
     bullets: [
       'Não servem para navegação e não substituem as fontes oficiais, como a Marinha do Brasil e a Capitania dos Portos.',
