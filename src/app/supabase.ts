@@ -89,7 +89,7 @@ async function fetchUser(accessToken: string): Promise<SessionUser> {
 export function signInWithGoogle() {
   const back = `${window.location.origin}/app/mural`
   window.location.assign(
-    `${URL_BASE}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(back)}`,
+    `${URL_BASE}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(back)}&apikey=${encodeURIComponent(ANON_KEY)}`,
   )
 }
 
