@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Menu, Waves, X } from 'lucide-react'
+import { Download, Menu, Waves, X } from 'lucide-react'
 import { menuItems } from '../data/site'
 import { BAND_HEIGHT, BAND_LOGO_W, useLogoFlight } from '../lib/useLogoFlight'
 import { useSeo } from '../lib/useSeo'
@@ -128,6 +128,14 @@ export default function Layout() {
                 </NavLink>
               )
             })}
+            <div className="my-1 border-t border-white/10" />
+            <Link to="/app/mare" className="group relative flex items-center rounded-full px-4 py-3 text-sm font-medium">
+              <span className="absolute inset-0 rounded-full bg-white/0 transition-colors duration-200 group-hover:bg-white/10" />
+              <span className="relative z-10 flex items-center gap-3 text-slate-300 transition-colors duration-200 group-hover:text-white">
+                <Download size={18} className="opacity-80" />
+                Instalar o app
+              </span>
+            </Link>
           </div>
           <p className="mt-6 flex items-center justify-center gap-2 text-xs text-white/40">
             <Waves size={14} /> Saco da Ribeira · Ubatuba

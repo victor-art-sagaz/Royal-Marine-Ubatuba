@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { Camera, Clock, Flag, ImagePlus, LogOut, MapPin, RefreshCw, ShieldCheck, Trash2, Eye, UserX } from 'lucide-react'
 import { BottomSheet } from './AppExtras'
+import { profileText } from './AppProfile'
 import { BEACHES, useApp } from './i18n'
 import {
   ApiError,
@@ -61,7 +62,8 @@ function WipeBanner() {
 }
 
 function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClose: () => void; onDone: (p: Post) => void; defaultName: string }) {
-  const { t, place } = useApp()
+  const { t, place, lang } = useApp()
+  const pt = profileText(lang)
   const fileRef = useRef<HTMLInputElement>(null)
   const [photo, setPhoto] = useState<Blob | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -147,7 +149,7 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
         <div className="text-xs font-semibold text-white/80">
           {t('feedNickname')}
           <p className="mt-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-normal text-white/85">{defaultName || 'Sem nome'}</p>
-          <span className="block text-[10px] font-normal text-white/40">Nome da sua conta Google. Não pode ser alterado.</span>
+          <span className="block text-[10px] font-normal text-white/40">{pt.nameNote}</span>
         </div>
 
         <label className="block text-xs font-semibold text-white/80">
@@ -202,7 +204,7 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
 
         {perfilOk === false ? (
           <p className="rounded-xl bg-amber-400/15 p-3 text-xs text-amber-100">
-            Antes de publicar, complete seu telefone e o nome da embarcação no seu perfil (ícone de pessoa, no topo).
+            {pt.profileWarn}
           </p>
         ) : null}
         {error ? <p className="rounded-xl bg-amber-400/15 p-3 text-xs text-amber-100">{error}</p> : null}
@@ -238,7 +240,8 @@ function PostCard({
   onRestored: () => void
   onNotice: (text: string) => void
 }) {
-  const { t, locale } = useApp()
+  const { t, locale, lang } = useApp()
+  const pt = profileText(lang)
   const session = readSession()
   const minutes = Math.round((Date.now() - new Date(post.created_at).getTime()) / 60000)
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
@@ -298,10 +301,10 @@ function PostCard({
                     {contato?.telefone}
                   </a>
                 ) : (
-                  'sem telefone'
+                  pt.noPhone
                 )}
                 {' · '}
-                {contato?.nome_embarcacao ?? 'sem embarcação'}
+                {contato?.nome_embarcacao ?? pt.noBoat}
                 {contato?.tipo_embarcacao ? ` (${contato.tipo_embarcacao})` : ''}
               </p>
             ) : null}
