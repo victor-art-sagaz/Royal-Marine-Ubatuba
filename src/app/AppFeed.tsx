@@ -5,7 +5,6 @@ import { BottomSheet } from './AppExtras'
 import { profileText } from './AppProfile'
 import { BEACHES, useApp } from './i18n'
 import {
-  ApiError,
   PAGE_SIZE,
   amIAdmin,
   completeSignInFromUrl,
@@ -117,8 +116,9 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
       onDone(post)
       onClose()
     } catch (e) {
-      // O banco recusa a 11ª foto do dia (regra de segurança)
-      setError(e instanceof ApiError && (e.status === 403 || e.status === 401) && readSession() ? t('feedLimit') : t('feedError'))
+      // Mostra o motivo que o banco devolveu, para não confundir com o limite de fotos
+      const detalhe = e instanceof Error && e.message ? ` (${e.message.slice(0, 200)})` : ''
+      setError(t('feedError') + detalhe)
     } finally {
       setBusy(false)
     }
