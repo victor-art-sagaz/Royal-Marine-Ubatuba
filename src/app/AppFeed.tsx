@@ -12,6 +12,8 @@ import {
   deleteMyAccount,
   deletePost,
   feedEnabled,
+  getMyProfile,
+  listContatos,
   listPosts,
   onSessionChange,
   photoUrl,
@@ -22,9 +24,7 @@ import {
   signInWithGoogle,
   signOut,
 } from './supabase'
-import type { Post, Session } from './supabase'
-
-const NICK_KEY = 'rm-apelido'
+import type { Perfil, Post, Session } from './supabase'
 
 /** Milissegundos até a próxima limpeza (23:59 no horário de Brasília) */
 function msUntilWipe(now = Date.now()) {
@@ -65,7 +65,7 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
   const fileRef = useRef<HTMLInputElement>(null)
   const [photo, setPhoto] = useState<Blob | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const [nickname, setNickname] = useState('')
+  const [perfilOk, setPerfilOk] = useState<boolean | null>(null)
   const [caption, setCaption] = useState('')
   const [beach, setBeach] = useState('')
   const [accepted, setAccepted] = useState(false)
@@ -74,13 +74,10 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
 
   useEffect(() => {
     if (!open) return
-    let saved = ''
-    try {
-      saved = window.localStorage.getItem(NICK_KEY) ?? ''
-    } catch {
-      /* sem armazenamento */
-    }
-    setNickname((saved || defaultName).slice(0, 30))
+    setPerfilOk(null)
+    getMyProfile()
+      .then((p) => setPerfilOk(Boolean(p?.telefone && p?.nome_embarcacao)))
+      .catch(() => setPerfilOk(false))
     setCaption('')
     setBeach(place.name)
     setAccepted(false)
@@ -107,20 +104,14 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
     }
   }
 
-  const nick = nickname.trim()
-  const canSend = Boolean(photo) && nick.length >= 2 && accepted && !busy
+  const canSend = Boolean(photo) && perfilOk === true && accepted && !busy
 
   const send = async () => {
     if (!photo || !canSend) return
     setBusy(true)
     setError(null)
     try {
-      try {
-        window.localStorage.setItem(NICK_KEY, nick)
-      } catch {
-        /* sem armazenamento */
-      }
-      const post = await createPost({ photo, nickname: nick, caption: caption.trim(), place: beach })
+      const post = await createPost({ photo, caption: caption.trim(), place: beach })
       onDone(post)
       onClose()
     } catch (e) {
@@ -153,15 +144,11 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
           )}
         </button>
 
-        <label className="block text-xs font-semibold text-white/80">
+        <div className="text-xs font-semibold text-white/80">
           {t('feedNickname')}
-          <input
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value.slice(0, 30))}
-            maxLength={30}
-            className="mt-1 w-full rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-sm font-normal text-white outline-none focus:border-teal"
-          />
-        </label>
+          <p className="mt-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-normal text-white/85">{defaultName || 'Sem nome'}</p>
+          <span className="block text-[10px] font-normal text-white/40">Nome da sua conta Google. Não pode ser alterado.</span>
+        </div>
 
         <label className="block text-xs font-semibold text-white/80">
           {t('feedCaption')} <span className="font-normal text-white/50">{t('optional')}</span>
@@ -213,6 +200,11 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
           </label>
         </div>
 
+        {perfilOk === false ? (
+          <p className="rounded-xl bg-amber-400/15 p-3 text-xs text-amber-100">
+            Antes de publicar, complete seu telefone e o nome da embarcação no seu perfil (ícone de pessoa, no topo).
+          </p>
+        ) : null}
         {error ? <p className="rounded-xl bg-amber-400/15 p-3 text-xs text-amber-100">{error}</p> : null}
 
         <button
@@ -233,6 +225,7 @@ function PostCard({
   post,
   mine,
   admin,
+  contato,
   onDeleted,
   onRestored,
   onNotice,
@@ -240,6 +233,7 @@ function PostCard({
   post: Post
   mine: boolean
   admin: boolean
+  contato?: Perfil
   onDeleted: () => void
   onRestored: () => void
   onNotice: (text: string) => void
@@ -281,6 +275,9 @@ function PostCard({
     }
   }
 
+  const digitos = (contato?.telefone ?? '').replace(/\D/g, '')
+  const wa = `https://wa.me/55${digitos.replace(/^55/, '')}`
+
   return (
     <article className={`overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.06] ${post.hidden ? 'opacity-60' : ''}`}>
       <img
@@ -294,6 +291,20 @@ function PostCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">{post.nickname}</p>
+            {admin ? (
+              <p className="mt-0.5 break-words text-[11px] text-[#e2bd45]">
+                {digitos ? (
+                  <a href={wa} target="_blank" rel="noreferrer" className="underline">
+                    {contato?.telefone}
+                  </a>
+                ) : (
+                  'sem telefone'
+                )}
+                {' · '}
+                {contato?.nome_embarcacao ?? 'sem embarcação'}
+                {contato?.tipo_embarcacao ? ` (${contato.tipo_embarcacao})` : ''}
+              </p>
+            ) : null}
             <p className="flex flex-wrap items-center gap-x-2 text-[11px] text-white/55">
               <span>{ago}</span>
               {post.place ? (
@@ -337,6 +348,7 @@ export default function AppFeed() {
   const [admin, setAdmin] = useState(false)
   const [composing, setComposing] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
+  const [contatos, setContatos] = useState<Record<string, Perfil>>({})
 
   const load = useCallback(async () => {
     setStatus('loading')
@@ -365,6 +377,15 @@ export default function AppFeed() {
     }
     amIAdmin().then(setAdmin)
   }, [session])
+
+  // Só a equipe carrega os contatos (o banco não entrega para mais ninguém)
+  useEffect(() => {
+    if (!admin) {
+      setContatos({})
+      return
+    }
+    listContatos().then(setContatos)
+  }, [admin, posts.length])
 
   useEffect(() => {
     if (!notice) return
@@ -503,6 +524,7 @@ export default function AppFeed() {
               post={p}
               mine={session?.user.id === p.user_id}
               admin={admin}
+              contato={contatos[p.user_id]}
               onDeleted={() => setPosts((list) => list.filter((x) => x.id !== p.id))}
               onRestored={() => setPosts((list) => list.map((x) => (x.id === p.id ? { ...x, hidden: false } : x)))}
               onNotice={setNotice}

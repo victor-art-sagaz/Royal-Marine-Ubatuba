@@ -191,13 +191,65 @@ export async function amIAdmin(): Promise<boolean> {
 
 export const photoUrl = (path: string) => `${URL_BASE}/storage/v1/object/public/${BUCKET}/${path}`
 
+/* ------------------------------ Perfil ------------------------------ */
+
+export interface Perfil {
+  user_id: string
+  telefone: string | null
+  tipo_embarcacao: string | null
+  nome_embarcacao: string | null
+}
+
+/** Telefone e embarcação da pessoa conectada (só ela e a equipe conseguem ler) */
+export async function getMyProfile(): Promise<Perfil | null> {
+  const s = await validSession()
+  if (!s) return null
+  const rows = await call<Perfil[]>(
+    `/rest/v1/perfis?select=user_id,telefone,tipo_embarcacao,nome_embarcacao&user_id=eq.${s.user.id}`,
+    {},
+    true,
+  )
+  return rows[0] ?? null
+}
+
+/** Salva o perfil. O nome e o e-mail vêm sempre da conta Google, por isso não são gravados aqui. */
+export async function saveMyProfile(dados: { telefone: string; tipo_embarcacao: string; nome_embarcacao: string }): Promise<void> {
+  const s = await validSession()
+  if (!s) throw new ApiError(401, 'login')
+  await call(
+    '/rest/v1/perfis?on_conflict=user_id',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({
+        user_id: s.user.id,
+        telefone: dados.telefone,
+        tipo_embarcacao: dados.tipo_embarcacao || null,
+        nome_embarcacao: dados.nome_embarcacao,
+        atualizado_em: new Date().toISOString(),
+      }),
+    },
+    true,
+  )
+}
+
+/** Equipe: telefone e embarcação de quem publicou. Para as outras pessoas, o banco não devolve nada. */
+export async function listContatos(): Promise<Record<string, Perfil>> {
+  const rows = await call<Perfil[]>(
+    '/rest/v1/perfis?select=user_id,telefone,tipo_embarcacao,nome_embarcacao',
+    {},
+    true,
+  ).catch(() => [] as Perfil[])
+  return Object.fromEntries(rows.map((r) => [r.user_id, r]))
+}
+
 const randomId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 
 /** Envia a foto (já reduzida) e cria a publicação */
-export async function createPost(input: { photo: Blob; nickname: string; caption: string; place: string }): Promise<Post> {
+export async function createPost(input: { photo: Blob; caption: string; place: string }): Promise<Post> {
   const s = await validSession()
   if (!s) throw new ApiError(401, 'login')
   const path = `${s.user.id}/${randomId()}.jpg`
@@ -211,7 +263,6 @@ export async function createPost(input: { photo: Blob; nickname: string; caption
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' },
       body: JSON.stringify({
-        nickname: input.nickname,
         caption: input.caption || null,
         image_path: path,
         place: input.place || null,

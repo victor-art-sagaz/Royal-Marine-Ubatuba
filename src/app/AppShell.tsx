@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { Bell, BellOff, BellRing, CloudSun, Globe, Trash2, Waves, X, Camera } from 'lucide-react'
+import { Bell, BellOff, BellRing, CloudSun, Globe, Trash2, User, Waves, X, Camera } from 'lucide-react'
 import { LogoAnchor } from '../components/Logo'
 import InstallAppButton from '../components/InstallAppButton'
 import {
@@ -13,6 +13,7 @@ import {
 import { useSeo } from '../lib/useSeo'
 import { AppPrefsProvider, LANGS, useApp } from './i18n'
 import { LanguageSheet } from './AppExtras'
+import { ProfileSheet } from './AppProfile'
 
 const tabs = [
   { to: '/app/mare', key: 'tabTide' as const, icon: Waves },
@@ -161,6 +162,7 @@ export default function AppShell() {
 function ShellLayout() {
   const [showAlerts, setShowAlerts] = useState(false)
   const [showLang, setShowLang] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
   const { t, lang } = useApp()
   const flag = LANGS.find((l) => l.code === lang)?.flag
   const alerts = useAppAlerts()
@@ -220,6 +222,14 @@ function ShellLayout() {
                   {pending}
                 </span>
               ) : null}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowProfile(true)}
+              aria-label="Meu perfil"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+            >
+              <User size={20} />
             </button>
           </div>
         </div>
@@ -285,6 +295,7 @@ function ShellLayout() {
 
       <AlertsSheet open={showAlerts} onClose={() => setShowAlerts(false)} />
       <LanguageSheet open={showLang} onClose={() => setShowLang(false)} />
+      <ProfileSheet open={showProfile} onClose={() => setShowProfile(false)} />
     </div>
   )
 }
