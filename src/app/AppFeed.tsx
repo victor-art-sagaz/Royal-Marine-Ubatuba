@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { Camera, Clock, Flag, ImagePlus, LogOut, MapPin, RefreshCw, ShieldCheck, Trash2, Eye, UserX } from 'lucide-react'
+import { Camera, Clock, Flag, Heart, ImagePlus, LogOut, MapPin, RefreshCw, ShieldCheck, Trash2, Eye, User, UserX } from 'lucide-react'
 import { BottomSheet } from './AppExtras'
 import { profileText } from './AppProfile'
 import { BEACHES, useApp } from './i18n'
@@ -14,8 +14,12 @@ import {
   feedEnabled,
   getMyProfile,
   listContatos,
+  listAvatares,
+  listLikes,
   listPosts,
   onSessionChange,
+  setLike,
+  syncGoogleAvatar,
   photoUrl,
   preparePhoto,
   readSession,
@@ -31,6 +35,20 @@ function msUntilWipe(now = Date.now()) {
   const brt = new Date(now - 3 * 3600000)
   const wipe = Date.UTC(brt.getUTCFullYear(), brt.getUTCMonth(), brt.getUTCDate(), 23, 59) + 3 * 3600000
   return wipe > now ? wipe - now : wipe + 86400000 - now
+}
+
+/** Junta as curtidas e as fotos de perfil de cada publicação */
+async function enrich(rows: Post[]): Promise<Post[]> {
+  const [likes, avatares] = await Promise.all([
+    listLikes(rows.map((r) => r.id)),
+    listAvatares(rows.map((r) => r.user_id)),
+  ])
+  return rows.map((r) => ({
+    ...r,
+    likes: likes.count[r.id] ?? 0,
+    liked: likes.mine.has(r.id),
+    avatar: avatares[r.user_id] ?? null,
+  }))
 }
 
 function useSession() {
@@ -278,6 +296,26 @@ function PostCard({
     }
   }
 
+  const [liked, setLiked] = useState(Boolean(post.liked))
+  const [likes, setLikes] = useState(post.likes ?? 0)
+
+  const toggleLike = async () => {
+    if (!session) {
+      signInWithGoogle()
+      return
+    }
+    const proximo = !liked
+    setLiked(proximo)
+    setLikes((n) => Math.max(0, n + (proximo ? 1 : -1)))
+    try {
+      await setLike(post.id, proximo)
+    } catch {
+      setLiked(!proximo)
+      setLikes((n) => Math.max(0, n + (proximo ? -1 : 1)))
+      onNotice(t('feedError'))
+    }
+  }
+
   const digitos = (contato?.telefone ?? '').replace(/\D/g, '')
   const wa = `https://wa.me/55${digitos.replace(/^55/, '')}`
 
@@ -292,8 +330,28 @@ function PostCard({
       />
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10">
+            {post.avatar ? (
+              <img src={post.avatar} alt="" loading="lazy" className="h-full w-full object-cover" />
+            ) : (
+              <User size={16} className="text-white/60" aria-hidden="true" />
+            )}
+          </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{post.nickname}</p>
+            <div className="flex items-center gap-2">
+              <p className="truncate text-sm font-semibold">{post.nickname}</p>
+              <button
+                type="button"
+                onClick={toggleLike}
+                aria-label={liked ? pt.unlikeLabel : pt.likeLabel}
+                aria-pressed={liked}
+                className="flex shrink-0 items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-white/80 hover:bg-white/15"
+              >
+                <Heart size={13} className={liked ? 'fill-[#e2bd45] text-[#e2bd45]' : ''} aria-hidden="true" />
+                {likes}
+              </button>
+            </div>
             {admin ? (
               <p className="mt-0.5 break-words text-[11px] text-[#e2bd45]">
                 {digitos ? (
@@ -316,6 +374,7 @@ function PostCard({
                 </span>
               ) : null}
             </p>
+          </div>
           </div>
           <div className="flex shrink-0 gap-1">
             {admin && post.hidden ? (
@@ -356,7 +415,7 @@ export default function AppFeed() {
   const load = useCallback(async () => {
     setStatus('loading')
     try {
-      const rows = await listPosts(0)
+      const rows = await enrich(await listPosts(0))
       setPosts(rows)
       setHasMore(rows.length === PAGE_SIZE)
       setStatus('ready')
@@ -381,6 +440,12 @@ export default function AppFeed() {
     amIAdmin().then(setAdmin)
   }, [session])
 
+  // Usa a foto da conta Google quando a pessoa ainda não escolheu outra
+  useEffect(() => {
+    if (session) syncGoogleAvatar().catch(() => undefined)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user.id])
+
   // Só a equipe carrega os contatos (o banco não entrega para mais ninguém)
   useEffect(() => {
     if (!admin) {
@@ -399,7 +464,7 @@ export default function AppFeed() {
   const more = async () => {
     setLoadingMore(true)
     try {
-      const rows = await listPosts(posts.length)
+      const rows = await enrich(await listPosts(posts.length))
       setPosts((p) => [...p, ...rows.filter((r) => !p.some((x) => x.id === r.id))])
       setHasMore(rows.length === PAGE_SIZE)
     } catch {
@@ -553,7 +618,7 @@ export default function AppFeed() {
         onClose={() => setComposing(false)}
         defaultName={session?.user.name ?? ''}
         onDone={(p) => {
-          setPosts((list) => [p, ...list])
+          enrich([p]).then(([novo]) => setPosts((list) => [novo ?? p, ...list]))
           setNotice(t('feedPublished'))
         }}
       />

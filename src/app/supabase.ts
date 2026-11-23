@@ -21,6 +21,8 @@ export interface SessionUser {
   id: string
   email: string
   name: string
+  /** foto da conta Google */
+  avatar?: string
 }
 
 export interface Session {
@@ -40,6 +42,10 @@ export interface Post {
   place: string | null
   hidden: boolean
   created_at: string
+  /** preenchidos ao carregar o feed */
+  likes?: number
+  liked?: boolean
+  avatar?: string | null
 }
 
 /* ------------------------------ Sessão ------------------------------ */
@@ -79,10 +85,15 @@ async function fetchUser(accessToken: string): Promise<SessionUser> {
   const u = (await res.json()) as {
     id: string
     email?: string
-    user_metadata?: { full_name?: string; name?: string; given_name?: string }
+    user_metadata?: { full_name?: string; name?: string; given_name?: string; avatar_url?: string; picture?: string }
   }
   const meta = u.user_metadata ?? {}
-  return { id: u.id, email: u.email ?? '', name: meta.given_name || meta.full_name || meta.name || '' }
+  return {
+    id: u.id,
+    email: u.email ?? '',
+    name: meta.given_name || meta.full_name || meta.name || '',
+    avatar: meta.avatar_url || meta.picture || undefined,
+  }
 }
 
 /** Abre a tela de login do Google. Depois do login, o Google volta para o Mural. */
@@ -363,4 +374,124 @@ export async function preparePhoto(file: File): Promise<Blob> {
   let blob = await toBlob(0.82)
   if (blob.size > 1_500_000) blob = await toBlob(0.65)
   return blob
+}
+
+/* ------------------------------ Curtidas e fotos de perfil ------------------------------ */
+
+export interface Avatar {
+  user_id: string
+  url: string
+  personalizada: boolean
+}
+
+/** Quantas curtidas cada publicação tem e em quais a pessoa conectada já curtiu */
+export async function listLikes(postIds: string[]): Promise<{ count: Record<string, number>; mine: Set<string> }> {
+  const count: Record<string, number> = {}
+  const mine = new Set<string>()
+  if (!postIds.length) return { count, mine }
+  const me = await validSession()
+  const rows = await call<{ post_id: string; user_id: string }[]>(
+    `/rest/v1/curtidas?select=post_id,user_id&post_id=in.(${postIds.join(',')})`,
+  ).catch(() => [] as { post_id: string; user_id: string }[])
+  for (const r of rows) {
+    count[r.post_id] = (count[r.post_id] ?? 0) + 1
+    if (me && r.user_id === me.user.id) mine.add(r.post_id)
+  }
+  return { count, mine }
+}
+
+/** Curtir ou descurtir uma publicação */
+export async function setLike(postId: string, like: boolean): Promise<void> {
+  const s = await validSession()
+  if (!s) throw new ApiError(401, 'login')
+  try {
+    if (like) {
+      await call(
+        '/rest/v1/curtidas',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({ post_id: postId, user_id: s.user.id }),
+        },
+        true,
+      )
+    } else {
+      await call(`/rest/v1/curtidas?post_id=eq.${postId}&user_id=eq.${s.user.id}`, { method: 'DELETE' }, true)
+    }
+  } catch (e) {
+    // já curtida (409): não é erro
+    if (like && e instanceof ApiError && e.status === 409) return
+    throw e
+  }
+}
+
+/** Fotos de perfil de quem publicou */
+export async function listAvatares(userIds: string[]): Promise<Record<string, string>> {
+  const unique = [...new Set(userIds)]
+  if (!unique.length) return {}
+  const rows = await call<Avatar[]>(
+    `/rest/v1/avatares?select=user_id,url,personalizada&user_id=in.(${unique.join(',')})`,
+  ).catch(() => [] as Avatar[])
+  return Object.fromEntries(rows.map((r) => [r.user_id, r.url]))
+}
+
+/** Foto de perfil da pessoa conectada */
+export async function getMyAvatar(): Promise<Avatar | null> {
+  const s = await validSession()
+  if (!s) return null
+  const rows = await call<Avatar[]>(
+    `/rest/v1/avatares?select=user_id,url,personalizada&user_id=eq.${s.user.id}`,
+    {},
+    true,
+  ).catch(() => [] as Avatar[])
+  return rows[0] ?? null
+}
+
+async function saveAvatar(url: string, personalizada: boolean): Promise<void> {
+  const s = await validSession()
+  if (!s) throw new ApiError(401, 'login')
+  await call(
+    '/rest/v1/avatares?on_conflict=user_id',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ user_id: s.user.id, url, personalizada, atualizado_em: new Date().toISOString() }),
+    },
+    true,
+  )
+}
+
+/** Usa a foto da conta Google, a não ser que a pessoa já tenha escolhido outra */
+export async function syncGoogleAvatar(): Promise<void> {
+  const s = await validSession()
+  if (!s?.user.avatar) return
+  const atual = await getMyAvatar()
+  if (atual?.personalizada || atual?.url === s.user.avatar) return
+  await saveAvatar(s.user.avatar, false)
+}
+
+/** Volta para a foto da conta Google */
+export async function useGoogleAvatar(): Promise<void> {
+  const s = await validSession()
+  if (!s?.user.avatar) throw new ApiError(404, 'sem foto no Google')
+  await saveAvatar(s.user.avatar, false)
+}
+
+/** Envia uma foto escolhida na galeria e a usa como foto de perfil */
+export async function uploadAvatar(photo: Blob): Promise<string> {
+  const s = await validSession()
+  if (!s) throw new ApiError(401, 'login')
+  const path = `${s.user.id}/${randomId()}.jpg`
+  await call(
+    `/storage/v1/object/avatares/${path}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'false', 'cache-control': '31536000' },
+      body: photo,
+    },
+    true,
+  )
+  const url = `${URL_BASE}/storage/v1/object/public/avatares/${path}`
+  await saveAvatar(url, true)
+  return url
 }

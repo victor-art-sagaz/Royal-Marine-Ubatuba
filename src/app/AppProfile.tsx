@@ -1,9 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent } from 'react'
 import { Check, ExternalLink, LogOut, Mail, Phone, RefreshCw, Ship, User } from 'lucide-react'
 import { BottomSheet } from './AppExtras'
 import type { Lang } from './i18n'
 import { useApp } from './i18n'
-import { getMyProfile, onSessionChange, readSession, saveMyProfile, signInWithGoogle, signOut } from './supabase'
+import {
+  getMyAvatar,
+  getMyProfile,
+  onSessionChange,
+  preparePhoto,
+  readSession,
+  saveMyProfile,
+  signInWithGoogle,
+  signOut,
+  uploadAvatar,
+  useGoogleAvatar,
+} from './supabase'
 import type { Session } from './supabase'
 
 /** Endereço do site oficial (troque aqui quando o domínio próprio estiver ativo) */
@@ -38,6 +50,12 @@ type Texts = {
   no: string
   kindPh: string
   kinds: string[]
+  chooseFromGallery: string
+  useGooglePhoto: string
+  sending: string
+  photoError: string
+  likeLabel: string
+  unlikeLabel: string
 }
 
 const TEXTS: Record<Lang, Texts> = {
@@ -68,6 +86,12 @@ const TEXTS: Record<Lang, Texts> = {
     no: 'Não',
     kindPh: 'Escolha o tipo',
     kinds: ['Lancha', 'Veleiro', 'Jet ski', 'Caiaque ou remo', 'Outro'],
+    chooseFromGallery: 'Escolher foto da galeria',
+    useGooglePhoto: 'Usar foto do Google',
+    sending: 'Enviando foto...',
+    photoError: 'Não consegui trocar a foto. Tente de novo.',
+    likeLabel: 'Curtir',
+    unlikeLabel: 'Descurtir',
     noPhone: 'sem telefone',
     noBoat: 'sem embarcação',
   },
@@ -98,6 +122,12 @@ const TEXTS: Record<Lang, Texts> = {
     no: 'No',
     kindPh: 'Choose the type',
     kinds: ['Motorboat', 'Sailboat', 'Jet ski', 'Kayak or rowboat', 'Other'],
+    chooseFromGallery: 'Choose photo from gallery',
+    useGooglePhoto: 'Use Google photo',
+    sending: 'Sending photo...',
+    photoError: 'I couldn’t change the photo. Please try again.',
+    likeLabel: 'Like',
+    unlikeLabel: 'Unlike',
     noPhone: 'no phone',
     noBoat: 'no boat',
   },
@@ -128,6 +158,12 @@ const TEXTS: Record<Lang, Texts> = {
     no: 'No',
     kindPh: 'Elige el tipo',
     kinds: ['Lancha', 'Velero', 'Moto acuática', 'Kayak o remo', 'Otro'],
+    chooseFromGallery: 'Elegir foto de la galería',
+    useGooglePhoto: 'Usar foto de Google',
+    sending: 'Enviando foto...',
+    photoError: 'No pude cambiar la foto. Inténtalo de nuevo.',
+    likeLabel: 'Me gusta',
+    unlikeLabel: 'Quitar me gusta',
     noPhone: 'sin teléfono',
     noBoat: 'sin embarcación',
   },
@@ -158,6 +194,12 @@ const TEXTS: Record<Lang, Texts> = {
     no: 'Non',
     kindPh: 'Choisissez le type',
     kinds: ['Vedette', 'Voilier', 'Jet ski', 'Kayak ou aviron', 'Autre'],
+    chooseFromGallery: 'Choisir une photo dans la galerie',
+    useGooglePhoto: 'Utiliser la photo Google',
+    sending: 'Envoi de la photo...',
+    photoError: 'Je n’ai pas pu changer la photo. Réessayez.',
+    likeLabel: 'J’aime',
+    unlikeLabel: 'Je n’aime plus',
     noPhone: 'sans téléphone',
     noBoat: 'sans bateau',
   },
@@ -188,6 +230,12 @@ const TEXTS: Record<Lang, Texts> = {
     no: 'Não',
     kindPh: 'Escolha o tipo',
     kinds: ['Lancha', 'Veleiro', 'Jet ski', 'Caiaque ou remo', 'Outro'],
+    chooseFromGallery: 'Escolher foto da galeria',
+    useGooglePhoto: 'Usar foto do Google',
+    sending: 'A enviar foto...',
+    photoError: 'Não consegui trocar a foto. Tente novamente.',
+    likeLabel: 'Gostar',
+    unlikeLabel: 'Deixar de gostar',
     noPhone: 'sem telefone',
     noBoat: 'sem embarcação',
   },
@@ -199,6 +247,40 @@ export const PT_KINDS = ['Lancha', 'Veleiro', 'Jet ski', 'Caiaque ou remo', 'Out
 /** Textos do perfil e do Mural no idioma escolhido no app */
 export function profileText(lang: Lang): Texts {
   return TEXTS[lang] ?? TEXTS['pt-BR']
+}
+
+/** Foto de perfil da pessoa conectada: a escolhida, ou a da conta Google. Sem foto, devolve null. */
+export function useMyAvatar(): string | null {
+  const [userId, setUserId] = useState<string | undefined>(() => readSession()?.user.id)
+  const [url, setUrl] = useState<string | null>(null)
+
+  useEffect(() => onSessionChange(() => setUserId(readSession()?.user.id)), [])
+
+  useEffect(() => {
+    let vivo = true
+    const carregar = () => {
+      const googleFoto = readSession()?.user.avatar ?? null
+      if (!userId) {
+        setUrl(null)
+        return
+      }
+      getMyAvatar()
+        .then((a) => {
+          if (vivo) setUrl(a?.url ?? googleFoto)
+        })
+        .catch(() => {
+          if (vivo) setUrl(googleFoto)
+        })
+    }
+    carregar()
+    window.addEventListener('rm-avatar', carregar)
+    return () => {
+      vivo = false
+      window.removeEventListener('rm-avatar', carregar)
+    }
+  }, [userId])
+
+  return url
 }
 
 /** Perfil da pessoa: nome e e-mail vêm do Google (só leitura); telefone e embarcação ela preenche */
@@ -214,10 +296,23 @@ export function ProfileSheet({ open, onClose }: { open: boolean; onClose: () => 
   const [salvando, setSalvando] = useState(false)
   const [salvo, setSalvo] = useState(false)
   const [aviso, setAviso] = useState<string | null>(null)
+  const [fotoUrl, setFotoUrl] = useState<string | null>(null)
+  const [enviandoFoto, setEnviandoFoto] = useState(false)
+  const [avisoFoto, setAvisoFoto] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => onSessionChange(() => setSession(readSession())), [])
 
   const userId = session?.user.id
+
+  useEffect(() => {
+    if (!open || !userId) return
+    getMyAvatar()
+      .then((a) => setFotoUrl(a?.url ?? session?.user.avatar ?? null))
+      .catch(() => setFotoUrl(session?.user.avatar ?? null))
+    // só recarrega ao abrir ou trocar de conta
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, userId])
 
   useEffect(() => {
     if (!open || !userId) return
@@ -236,6 +331,42 @@ export function ProfileSheet({ open, onClose }: { open: boolean; onClose: () => 
     // tx muda só com o idioma; não recarrega o perfil por isso
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, userId])
+
+  const avisarFoto = () => window.dispatchEvent(new Event('rm-avatar'))
+
+  const escolherFoto = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setEnviandoFoto(true)
+    setAvisoFoto(null)
+    try {
+      const blob = await preparePhoto(file)
+      const url = await uploadAvatar(blob)
+      setFotoUrl(url)
+      avisarFoto()
+    } catch (err) {
+      const detalhe = err instanceof Error && err.message ? ` (${err.message.slice(0, 160)})` : ''
+      setAvisoFoto(tx.photoError + detalhe)
+    } finally {
+      setEnviandoFoto(false)
+    }
+  }
+
+  const usarGoogle = async () => {
+    setEnviandoFoto(true)
+    setAvisoFoto(null)
+    try {
+      await useGoogleAvatar()
+      setFotoUrl(session?.user.avatar ?? null)
+      avisarFoto()
+    } catch (err) {
+      const detalhe = err instanceof Error && err.message ? ` (${err.message.slice(0, 160)})` : ''
+      setAvisoFoto(tx.photoError + detalhe)
+    } finally {
+      setEnviandoFoto(false)
+    }
+  }
 
   const digitos = telefone.replace(/\D/g, '').length
   const barcoOk = temBarco !== true || nomeBarco.trim().length >= 2
@@ -289,6 +420,38 @@ export function ProfileSheet({ open, onClose }: { open: boolean; onClose: () => 
             </p>
             <p className="text-[11px] leading-relaxed text-white/55">{tx.readonlyNote}</p>
           </div>
+
+          <div className="flex items-center gap-4">
+            <span className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10">
+              {fotoUrl ? (
+                <img src={fotoUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <User size={34} className="text-white/70" aria-hidden="true" />
+              )}
+            </span>
+            <div className="min-w-0 flex-1 space-y-2">
+              <button
+                type="button"
+                disabled={enviandoFoto}
+                onClick={() => fileRef.current?.click()}
+                className="w-full rounded-full bg-white/10 py-2 text-xs font-semibold text-white hover:bg-white/15 disabled:opacity-50"
+              >
+                {enviandoFoto ? tx.sending : tx.chooseFromGallery}
+              </button>
+              {session.user.avatar ? (
+                <button
+                  type="button"
+                  disabled={enviandoFoto}
+                  onClick={usarGoogle}
+                  className="w-full rounded-full border border-white/15 py-2 text-xs text-white/85 hover:bg-white/10 disabled:opacity-50"
+                >
+                  {tx.useGooglePhoto}
+                </button>
+              ) : null}
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={escolherFoto} />
+          </div>
+          {avisoFoto ? <p className="rounded-xl bg-amber-400/15 p-3 text-xs text-amber-100">{avisoFoto}</p> : null}
 
           <label className="block text-xs font-semibold text-white/80">
             {tx.phone} <span className="font-normal text-white/50">{tx.required}</span>

@@ -13,7 +13,7 @@ import {
 import { useSeo } from '../lib/useSeo'
 import { AppPrefsProvider, LANGS, useApp } from './i18n'
 import { LanguageSheet } from './AppExtras'
-import { ProfileSheet } from './AppProfile'
+import { ProfileSheet, useMyAvatar } from './AppProfile'
 
 const tabs = [
   { to: '/app/mare', key: 'tabTide' as const, icon: Waves },
@@ -163,6 +163,7 @@ function ShellLayout() {
   const [showAlerts, setShowAlerts] = useState(false)
   const [showLang, setShowLang] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
+  const avatar = useMyAvatar()
   const { t, lang } = useApp()
   const flag = LANGS.find((l) => l.code === lang)?.flag
   const alerts = useAppAlerts()
@@ -229,7 +230,11 @@ function ShellLayout() {
               aria-label="Meu perfil"
               className="flex h-10 w-10 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
             >
-              <User size={20} />
+              {avatar ? (
+                <img src={avatar} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-white/30" />
+              ) : (
+                <User size={20} />
+              )}
             </button>
           </div>
         </div>
