@@ -225,7 +225,7 @@ export async function saveMyProfile(dados: { telefone: string; tipo_embarcacao: 
         user_id: s.user.id,
         telefone: dados.telefone,
         tipo_embarcacao: dados.tipo_embarcacao || null,
-        nome_embarcacao: dados.nome_embarcacao,
+        nome_embarcacao: dados.nome_embarcacao || null,
         atualizado_em: new Date().toISOString(),
       }),
     },

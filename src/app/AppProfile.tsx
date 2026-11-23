@@ -33,6 +33,11 @@ type Texts = {
   profileWarn: string
   noPhone: string
   noBoat: string
+  hasBoat: string
+  yes: string
+  no: string
+  kindPh: string
+  kinds: string[]
 }
 
 const TEXTS: Record<Lang, Texts> = {
@@ -57,7 +62,12 @@ const TEXTS: Record<Lang, Texts> = {
     signOut: 'Sair da conta',
     visitSite: 'Visitar o site oficial',
     nameNote: 'Nome da sua conta Google. Não pode ser alterado.',
-    profileWarn: 'Antes de publicar, complete seu telefone e o nome da embarcação no seu perfil (ícone de pessoa, no topo).',
+    profileWarn: 'Antes de publicar, complete seu telefone no seu perfil (ícone de pessoa, no topo).',
+    hasBoat: 'Você tem embarcação?',
+    yes: 'Sim',
+    no: 'Não',
+    kindPh: 'Escolha o tipo',
+    kinds: ['Lancha', 'Veleiro', 'Jet ski', 'Caiaque ou remo', 'Outro'],
     noPhone: 'sem telefone',
     noBoat: 'sem embarcação',
   },
@@ -82,7 +92,12 @@ const TEXTS: Record<Lang, Texts> = {
     signOut: 'Sign out',
     visitSite: 'Visit the official website',
     nameNote: "Name from your Google account. It can't be changed.",
-    profileWarn: 'Before posting, complete your phone and boat name in your profile (person icon at the top).',
+    profileWarn: 'Before posting, add your phone number in your profile (person icon at the top).',
+    hasBoat: 'Do you have a boat?',
+    yes: 'Yes',
+    no: 'No',
+    kindPh: 'Choose the type',
+    kinds: ['Motorboat', 'Sailboat', 'Jet ski', 'Kayak or rowboat', 'Other'],
     noPhone: 'no phone',
     noBoat: 'no boat',
   },
@@ -107,7 +122,12 @@ const TEXTS: Record<Lang, Texts> = {
     signOut: 'Cerrar sesión',
     visitSite: 'Visitar el sitio oficial',
     nameNote: 'Nombre de tu cuenta de Google. No se puede cambiar.',
-    profileWarn: 'Antes de publicar, completa tu teléfono y el nombre de la embarcación en tu perfil (icono de persona, arriba).',
+    profileWarn: 'Antes de publicar, completa tu teléfono en tu perfil (icono de persona, arriba).',
+    hasBoat: '¿Tienes embarcación?',
+    yes: 'Sí',
+    no: 'No',
+    kindPh: 'Elige el tipo',
+    kinds: ['Lancha', 'Velero', 'Moto acuática', 'Kayak o remo', 'Otro'],
     noPhone: 'sin teléfono',
     noBoat: 'sin embarcación',
   },
@@ -132,7 +152,12 @@ const TEXTS: Record<Lang, Texts> = {
     signOut: 'Se déconnecter',
     visitSite: 'Visiter le site officiel',
     nameNote: 'Nom de votre compte Google. Il ne peut pas être modifié.',
-    profileWarn: 'Avant de publier, renseignez votre téléphone et le nom du bateau dans votre profil (icône personne, en haut).',
+    profileWarn: 'Avant de publier, renseignez votre téléphone dans votre profil (icône personne, en haut).',
+    hasBoat: 'Avez-vous un bateau ?',
+    yes: 'Oui',
+    no: 'Non',
+    kindPh: 'Choisissez le type',
+    kinds: ['Vedette', 'Voilier', 'Jet ski', 'Kayak ou aviron', 'Autre'],
     noPhone: 'sans téléphone',
     noBoat: 'sans bateau',
   },
@@ -157,11 +182,19 @@ const TEXTS: Record<Lang, Texts> = {
     signOut: 'Terminar sessão',
     visitSite: 'Visitar o site oficial',
     nameNote: 'Nome da sua conta Google. Não pode ser alterado.',
-    profileWarn: 'Antes de publicar, complete o seu telefone e o nome da embarcação no seu perfil (ícone de pessoa, no topo).',
+    profileWarn: 'Antes de publicar, indique o seu telefone no seu perfil (ícone de pessoa, no topo).',
+    hasBoat: 'Tem embarcação?',
+    yes: 'Sim',
+    no: 'Não',
+    kindPh: 'Escolha o tipo',
+    kinds: ['Lancha', 'Veleiro', 'Jet ski', 'Caiaque ou remo', 'Outro'],
     noPhone: 'sem telefone',
     noBoat: 'sem embarcação',
   },
 }
+
+/** Valores gravados no banco (sempre em português, para a equipe ler igual em qualquer idioma) */
+export const PT_KINDS = ['Lancha', 'Veleiro', 'Jet ski', 'Caiaque ou remo', 'Outro']
 
 /** Textos do perfil e do Mural no idioma escolhido no app */
 export function profileText(lang: Lang): Texts {
@@ -174,6 +207,7 @@ export function ProfileSheet({ open, onClose }: { open: boolean; onClose: () => 
   const tx = profileText(lang)
   const [session, setSession] = useState<Session | null>(readSession)
   const [telefone, setTelefone] = useState('')
+  const [temBarco, setTemBarco] = useState<boolean | null>(null)
   const [tipo, setTipo] = useState('')
   const [nomeBarco, setNomeBarco] = useState('')
   const [carregando, setCarregando] = useState(false)
@@ -195,6 +229,7 @@ export function ProfileSheet({ open, onClose }: { open: boolean; onClose: () => 
         setTelefone(p?.telefone ?? '')
         setTipo(p?.tipo_embarcacao ?? '')
         setNomeBarco(p?.nome_embarcacao ?? '')
+        setTemBarco(p?.tipo_embarcacao || p?.nome_embarcacao ? true : p ? false : null)
       })
       .catch(() => setAviso(tx.loadError))
       .finally(() => setCarregando(false))
@@ -203,17 +238,23 @@ export function ProfileSheet({ open, onClose }: { open: boolean; onClose: () => 
   }, [open, userId])
 
   const digitos = telefone.replace(/\D/g, '').length
-  const podeSalvar = Boolean(session) && digitos >= 8 && nomeBarco.trim().length >= 2 && !salvando && !carregando
+  const barcoOk = temBarco !== true || nomeBarco.trim().length >= 2
+  const podeSalvar = Boolean(session) && digitos >= 8 && temBarco !== null && barcoOk && !salvando && !carregando
 
   const salvar = async () => {
     if (!podeSalvar) return
     setSalvando(true)
     setAviso(null)
     try {
-      await saveMyProfile({ telefone: telefone.trim(), tipo_embarcacao: tipo.trim(), nome_embarcacao: nomeBarco.trim() })
+      await saveMyProfile({
+        telefone: telefone.trim(),
+        tipo_embarcacao: temBarco ? tipo.trim() : '',
+        nome_embarcacao: temBarco ? nomeBarco.trim() : '',
+      })
       setSalvo(true)
-    } catch {
-      setAviso(tx.saveError)
+    } catch (e) {
+      const detalhe = e instanceof Error && e.message ? ` (${e.message.slice(0, 160)})` : ''
+      setAviso(tx.saveError + detalhe)
     } finally {
       setSalvando(false)
     }
@@ -265,29 +306,64 @@ export function ProfileSheet({ open, onClose }: { open: boolean; onClose: () => 
             </span>
           </label>
 
-          <label className="block text-xs font-semibold text-white/80">
-            {tx.boatType} <span className="font-normal text-white/50">{tx.optional}</span>
-            <span className="relative block">
-              <Ship size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40" aria-hidden="true" />
-              <input
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value.slice(0, 40))}
-                placeholder={tx.boatTypePh}
-                disabled={carregando}
-                className={`${campo} pl-9`}
-              />
-            </span>
-          </label>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-white/80">{tx.hasBoat}</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { valor: true, texto: tx.yes },
+                { valor: false, texto: tx.no },
+              ].map((op) => (
+                <button
+                  key={String(op.valor)}
+                  type="button"
+                  disabled={carregando}
+                  onClick={() => setTemBarco(op.valor)}
+                  aria-pressed={temBarco === op.valor}
+                  className={`rounded-full border py-2.5 text-sm font-medium transition ${
+                    temBarco === op.valor
+                      ? 'border-teal bg-teal text-navy-dark'
+                      : 'border-white/15 bg-white/5 text-white/80 hover:bg-white/10'
+                  }`}
+                >
+                  {op.texto}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          <label className="block text-xs font-semibold text-white/80">
-            {tx.boatName} <span className="font-normal text-white/50">{tx.required}</span>
-            <input
-              value={nomeBarco}
-              onChange={(e) => setNomeBarco(e.target.value.slice(0, 60))}
-              disabled={carregando}
-              className={campo}
-            />
-          </label>
+          {temBarco === true ? (
+            <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+              <label className="block text-xs font-semibold text-white/80">
+                {tx.boatType} <span className="font-normal text-white/50">{tx.optional}</span>
+                <span className="relative block">
+                  <Ship size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40" aria-hidden="true" />
+                  <select
+                    value={tipo}
+                    onChange={(e) => setTipo(e.target.value)}
+                    disabled={carregando}
+                    className={`${campo} appearance-none pl-9`}
+                  >
+                    <option value="">{tx.kindPh}</option>
+                    {PT_KINDS.map((valor, i) => (
+                      <option key={valor} value={valor} className="bg-navy-dark">
+                        {tx.kinds[i]}
+                      </option>
+                    ))}
+                  </select>
+                </span>
+              </label>
+
+              <label className="block text-xs font-semibold text-white/80">
+                {tx.boatName} <span className="font-normal text-white/50">{tx.required}</span>
+                <input
+                  value={nomeBarco}
+                  onChange={(e) => setNomeBarco(e.target.value.slice(0, 60))}
+                  disabled={carregando}
+                  className={campo}
+                />
+              </label>
+            </div>
+          ) : null}
 
           <p className="text-[11px] leading-relaxed text-white/55">{tx.privacy}</p>
 

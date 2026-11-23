@@ -78,7 +78,7 @@ function Composer({ open, onClose, onDone, defaultName }: { open: boolean; onClo
     if (!open) return
     setPerfilOk(null)
     getMyProfile()
-      .then((p) => setPerfilOk(Boolean(p?.telefone && p?.nome_embarcacao)))
+      .then((p) => setPerfilOk(Boolean(p?.telefone)))
       .catch(() => setPerfilOk(false))
     setCaption('')
     setBeach(place.name)
