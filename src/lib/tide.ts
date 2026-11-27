@@ -1,14 +1,11 @@
-import { TIDE_EXTREMES, TIDE_SOURCE } from '../data/mares-ubatuba'
+import { WEATHER_PLACE, seaPoints } from './weather'
 import type { Place } from './weather'
 
 /**
- * Maré de Ubatuba pela tábua oficial do Instituto Oceanográfico da USP (estação da Base Norte, em Ubatuba).
- * Os horários e alturas das preia-mares e baixa-mares vêm da tábua (ficam dentro do site, sem custo).
- * Entre uma maré e outra, a curva é desenhada com a forma de onda (cosseno), como fazem as tábuas.
- * Alturas em relação ao nível de redução (o zero da carta náutica). Não serve para navegação.
+ * Maré do Saco da Ribeira (Ubatuba) a partir da previsão gratuita da Open-Meteo
+ * (altura do mar em relação ao nível médio, já com o efeito da maré).
+ * É uma estimativa por modelo: não serve para navegação. Para dados oficiais, consulte a Marinha.
  */
-
-export { TIDE_SOURCE }
 
 export interface TidePoint {
   /** Data e hora local, ex.: 2026-11-13T14:00 */
@@ -34,58 +31,95 @@ export interface TideDay {
   extremes: TideExtreme[]
 }
 
-const FORECAST_DAYS = 7
-
-/** "AAAA-MM-DDTHH:mm" (hora de Brasília) → milissegundos */
-const ms = (local: string) => Date.parse(`${local}:00-03:00`)
-const hourOf = (local: string) => Number(local.slice(11, 13)) + Number(local.slice(14, 16)) / 60
-
-/** Hoje no horário de Brasília (AAAA-MM-DD) */
-const todayBrazil = () => new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 10)
-
-const addDays = (date: string, n: number) => new Date(Date.parse(`${date}T12:00:00Z`) + n * 86400000).toISOString().slice(0, 10)
-
-/** Altura da maré num instante, pela curva entre as duas marés vizinhas */
-function heightAt(t: number, list: { t: number; h: number }[], i: number) {
-  const a = list[i]
-  const b = list[i + 1]
-  const f = (t - a.t) / (b.t - a.t)
-  return a.h + (b.h - a.h) * (1 - Math.cos(Math.PI * f)) / 2
+interface MarineTideResponse {
+  hourly?: { time: string[]; sea_level_height_msl: (number | null)[] }
 }
 
-export async function fetchTides(_signal?: AbortSignal, _place?: Place): Promise<TideDay[]> {
-  const list = TIDE_EXTREMES.map(([local, h]) => ({ local, t: ms(local), h }))
-  if (list.length < 3) throw new Error('Tábua de marés indisponível')
 
-  const start = todayBrazil()
-  const days: TideDay[] = []
-  for (let d = 0; d < FORECAST_DAYS; d++) {
-    const date = addDays(start, d)
-    const dayStart = ms(`${date}T00:00`)
-    // Precisa de marés antes do início e depois do fim do dia
-    const i0 = list.findIndex((e) => e.t > dayStart) - 1
-    if (i0 < 0 || list[list.length - 1].t < dayStart + 86400000) break
+const FORECAST_DAYS = 7
 
-    const points: TidePoint[] = []
-    let i = i0
-    for (let hour = 0; hour <= 24; hour++) {
-      const t = dayStart + hour * 3600000
-      while (i < list.length - 2 && list[i + 1].t <= t) i++
-      const local = new Date(t - 3 * 3600000).toISOString().slice(0, 16)
-      points.push({ time: local, hour, height: Math.round(heightAt(t, list, i) * 100) / 100 })
+async function fetchSeries(lat: number, lon: number, signal?: AbortSignal) {
+  const url =
+    `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}` +
+    `&hourly=sea_level_height_msl&timezone=America%2FSao_Paulo&forecast_days=${FORECAST_DAYS + 1}`
+  const response = await fetch(url, { signal })
+  if (!response.ok) throw new Error(`Falha ao buscar a maré (${response.status})`)
+  const data = (await response.json()) as MarineTideResponse
+  const times = data.hourly?.time ?? []
+  const values = data.hourly?.sea_level_height_msl ?? []
+  const series = times.map((time, i) => ({ time, height: values[i] }))
+  const valid = series.filter((p): p is { time: string; height: number } => typeof p.height === 'number')
+  // Precisa de quase todos os valores para desenhar a curva
+  if (valid.length < times.length * 0.9 || valid.length < 48) throw new Error('Sem dados de maré para este ponto')
+  return valid
+}
+
+const hourOf = (time: string) => Number(time.slice(11, 13)) + Number(time.slice(14, 16)) / 60
+
+/** Encontra preia-mares (picos) e baixa-mares (vales), afinando a hora entre um ponto e outro. */
+function findExtremes(series: { time: string; height: number }[]) {
+  const result: { date: string; type: 'high' | 'low'; hour: number; height: number }[] = []
+  for (let i = 1; i < series.length - 1; i++) {
+    const a = series[i - 1].height
+    const b = series[i].height
+    const c = series[i + 1].height
+    const isHigh = b >= a && b > c
+    const isLow = b <= a && b < c
+    if (!isHigh && !isLow) continue
+    // Parábola pelos 3 pontos: acha o momento exato do topo/fundo
+    const denom = a - 2 * b + c
+    const offset = denom === 0 ? 0 : Math.max(-0.5, Math.min(0.5, (a - c) / (2 * denom)))
+    const height = b - ((a - c) * offset) / 4
+    let hour = hourOf(series[i].time) + offset
+    let date = series[i].time.slice(0, 10)
+    if (hour < 0) {
+      hour += 24
+      date = series[i - 1].time.slice(0, 10)
+    } else if (hour >= 24) {
+      hour -= 24
+      date = series[i + 1].time.slice(0, 10)
     }
-
-    const extremes: TideExtreme[] = []
-    list.forEach((e, k) => {
-      if (!e.local.startsWith(date)) return
-      const prev = list[k - 1]?.h ?? list[k + 1].h
-      const next = list[k + 1]?.h ?? prev
-      extremes.push({ type: e.h >= prev && e.h >= next ? 'high' : 'low', hour: hourOf(e.local), height: e.h })
-    })
-    days.push({ date, points, extremes })
+    result.push({ date, type: isHigh ? 'high' : 'low', hour, height })
   }
-  if (!days.length) throw new Error('Tábua de marés desatualizada')
-  return days
+  return result
+}
+
+export async function fetchTides(signal?: AbortSignal, place: Place = WEATHER_PLACE): Promise<TideDay[]> {
+  let series: { time: string; height: number }[] | null = null
+  let lastError: unknown = null
+  // Pontos tentados em ordem: em frente ao lugar e, se faltar dado, um pouco mais ao largo
+  for (const point of seaPoints(place)) {
+    try {
+      series = await fetchSeries(point.lat, point.lon, signal)
+      break
+    } catch (error) {
+      if (signal?.aborted) throw error
+      lastError = error
+    }
+  }
+  if (!series) throw lastError ?? new Error('Sem dados de maré')
+
+  const extremes = findExtremes(series)
+  const dates = Array.from(new Set(series.map((p) => p.time.slice(0, 10)))).slice(0, FORECAST_DAYS)
+
+  return dates
+    .map((date) => {
+      const points: TidePoint[] = []
+      series!.forEach((p, i) => {
+        if (p.time.slice(0, 10) === date) {
+          points.push({ time: p.time, hour: hourOf(p.time), height: p.height })
+          // Fecha o gráfico às 24:00 com a meia-noite do dia seguinte
+          const next = series![i + 1]
+          if (p.time.slice(11, 13) === '23' && next) points.push({ time: next.time, hour: 24, height: next.height })
+        }
+      })
+      return {
+        date,
+        points,
+        extremes: extremes.filter((e) => e.date === date).map(({ type, hour, height }) => ({ type, hour, height })),
+      }
+    })
+    .filter((day) => day.points.length >= 24)
 }
 
 /** 14.5 → "14:30" */

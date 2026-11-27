@@ -97,7 +97,7 @@ export default function AppWeather() {
   const { current, hourly, daily, marine } = data
   const info = describeWeather(current.code)
   const events = findEvents(data)
-  const sea = seaLevel(marine?.waveHeight ?? null, current.windGusts ?? current.windSpeed)
+  const sea = seaLevel(marine?.waveHeight ?? null, current.windGusts)
 
   const summaryOf = (e: WeatherEvent) =>
     e.kind === 'rain'
@@ -135,7 +135,7 @@ export default function AppWeather() {
           </div>
           <div className="rounded-2xl bg-white/10 p-3">
             <Wind size={18} className="mx-auto text-teal" aria-hidden="true" />
-            <p className="mt-1 text-sm font-semibold">{current.windGusts != null ? `${round(current.windGusts)} km/h` : '–'}</p>
+            <p className="mt-1 text-sm font-semibold">{round(current.windGusts)} km/h</p>
             <p className="text-[10px] uppercase text-white/50">{t('gusts')}</p>
           </div>
           <div className="rounded-2xl bg-white/10 p-3">

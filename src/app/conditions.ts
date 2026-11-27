@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchMet, fetchWaves, toBrazilLocal } from '../lib/weather'
+import { seaPoints } from '../lib/weather'
 import type { Place } from '../lib/weather'
 
 /** Ondas e vento de uma hora do dia */
@@ -14,54 +14,68 @@ export interface HourConditions {
 /** "AAAA-MM-DD" → hora (0–23) → condições */
 export type ConditionsByDay = Record<string, Record<number, HourConditions>>
 
-interface Sample {
-  /** milissegundos (UTC) */
-  at: number
-  [key: string]: number | null
+interface MarineHourly {
+  hourly?: { time: string[]; wave_height?: (number | null)[]; wave_direction?: (number | null)[]; wave_period?: (number | null)[] }
+}
+interface WindHourly {
+  hourly?: { time: string[]; wind_speed_10m?: (number | null)[]; wind_direction_10m?: (number | null)[] }
 }
 
-/** Valor mais próximo da hora pedida (até 3 horas de diferença) */
-function nearest<T extends Sample>(list: T[], at: number): T | null {
-  let best: T | null = null
-  for (const s of list) {
-    if (Math.abs(s.at - at) <= 3 * 3600000 && (!best || Math.abs(s.at - at) < Math.abs(best.at - at))) best = s
-  }
-  return best
+const TZ = 'timezone=America%2FSao_Paulo&forecast_days=7'
+
+async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(url, { signal })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return (await res.json()) as T
 }
 
-/** Busca vento (MET Norway) e ondas (CPTEC/INPE) para os próximos dias */
-export async function fetchConditions(place: Place, signal?: AbortSignal): Promise<ConditionsByDay> {
-  const [met, waves] = await Promise.all([fetchMet(place, signal).catch(() => null), fetchWaves(signal)])
-
-  const wind = (met?.properties.timeseries ?? []).map((s) => ({
-    at: Date.parse(s.time),
-    speed: typeof s.data.instant.details.wind_speed === 'number' ? s.data.instant.details.wind_speed * 3.6 : null,
-    dir: s.data.instant.details.wind_from_direction ?? null,
-  }))
-  const sea = waves.map((w) => ({ at: Date.parse(w.hora), height: w.altura, dir: w.direcao }))
-  if (!wind.length && !sea.length) return {}
-
-  const all = [...wind.map((w) => w.at), ...sea.map((w) => w.at)]
-  const first = Math.min(...all)
-  const last = Math.max(...all)
-  const out: ConditionsByDay = {}
-  // Uma linha por hora inteira, do primeiro ao último dado
-  for (let at = Math.floor(first / 3600000) * 3600000; at <= last; at += 3600000) {
-    const local = toBrazilLocal(new Date(at).toISOString())
-    const date = local.slice(0, 10)
-    const hour = Number(local.slice(11, 13))
-    const w = nearest(wind, at)
-    const s = nearest(sea, at)
-    if (!w && !s) continue
-    if (!out[date]) out[date] = {}
-    out[date][hour] = {
-      waveHeight: s?.height ?? null,
-      waveDirection: s?.dir ?? null,
-      wavePeriod: null,
-      windSpeed: w?.speed ?? null,
-      windDirection: w?.dir ?? null,
+async function fetchWaves(place: Place, signal?: AbortSignal): Promise<MarineHourly | null> {
+  for (const p of seaPoints(place)) {
+    try {
+      const data = await getJson<MarineHourly>(
+        `https://marine-api.open-meteo.com/v1/marine?latitude=${p.lat}&longitude=${p.lon}&hourly=wave_height,wave_direction,wave_period&${TZ}`,
+        signal,
+      )
+      if (data.hourly?.wave_height?.some((v) => typeof v === 'number')) return data
+    } catch {
+      if (signal?.aborted) return null
     }
   }
+  return null
+}
+
+/** Busca ondas (altura, direção, período) e vento hora a hora para 7 dias */
+export async function fetchConditions(place: Place, signal?: AbortSignal): Promise<ConditionsByDay> {
+  const [waves, wind] = await Promise.all([
+    fetchWaves(place, signal),
+    getJson<WindHourly>(
+      `https://api.open-meteo.com/v1/forecast?latitude=${place.lat}&longitude=${place.lon}&hourly=wind_speed_10m,wind_direction_10m&${TZ}`,
+      signal,
+    ).catch(() => null),
+  ])
+  const out: ConditionsByDay = {}
+  const slot = (iso: string) => {
+    const date = iso.slice(0, 10)
+    const hour = Number(iso.slice(11, 13))
+    if (!out[date]) out[date] = {}
+    if (!out[date][hour]) {
+      out[date][hour] = { waveHeight: null, waveDirection: null, wavePeriod: null, windSpeed: null, windDirection: null }
+    }
+    return out[date][hour]
+  }
+  const h = waves?.hourly
+  h?.time.forEach((iso, i) => {
+    const s = slot(iso)
+    s.waveHeight = h.wave_height?.[i] ?? null
+    s.waveDirection = h.wave_direction?.[i] ?? null
+    s.wavePeriod = h.wave_period?.[i] ?? null
+  })
+  const w = wind?.hourly
+  w?.time.forEach((iso, i) => {
+    const s = slot(iso)
+    s.windSpeed = w.wind_speed_10m?.[i] ?? null
+    s.windDirection = w.wind_direction_10m?.[i] ?? null
+  })
   return out
 }
 

@@ -478,10 +478,9 @@ export default function Tide() {
             ) : null}
 
             <p className="mt-6 text-center text-xs font-light text-slate-500">
-              Horários e alturas da tábua de marés de Ubatuba do Instituto Oceanográfico da USP (J. Harari), com alturas em
-              relação ao nível de redução (o zero da carta náutica). A curva entre uma maré e outra é aproximada e o vento
-              pode mudar o nível do mar. Serve para planejar o passeio e a pescaria,{' '}
-              <strong className="font-medium">não para navegação</strong>.
+              Alturas em relação ao nível médio do mar, estimadas por modelo (Open-Meteo / Copernicus Marine). Servem para
+              planejar o passeio e a pescaria, <strong className="font-medium">não para navegação</strong>. Os horários
+              podem variar alguns minutos em relação às tábuas oficiais.
             </p>
           </>
         ) : null}
