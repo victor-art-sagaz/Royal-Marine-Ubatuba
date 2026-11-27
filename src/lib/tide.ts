@@ -1,5 +1,6 @@
 import { WEATHER_PLACE, seaPoints } from './weather'
 import type { Place } from './weather'
+import { openMeteoFetch } from './openMeteo'
 
 /**
  * Maré do Saco da Ribeira (Ubatuba) a partir da previsão gratuita da Open-Meteo
@@ -42,7 +43,7 @@ async function fetchSeries(lat: number, lon: number, signal?: AbortSignal) {
   const url =
     `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}` +
     `&hourly=sea_level_height_msl&timezone=America%2FSao_Paulo&forecast_days=${FORECAST_DAYS + 1}`
-  const response = await fetch(url, { signal })
+  const response = await openMeteoFetch(url, signal)
   if (!response.ok) throw new Error(`Falha ao buscar a maré (${response.status})`)
   const data = (await response.json()) as MarineTideResponse
   const times = data.hourly?.time ?? []

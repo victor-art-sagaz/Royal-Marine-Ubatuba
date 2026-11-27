@@ -1,3 +1,5 @@
+import { openMeteoFetch } from './openMeteo'
+
 /**
  * Previsão do tempo e do mar para Ubatuba (Saco da Ribeira).
  * Fonte dos dados: Open-Meteo.com (gratuito, sem chave de acesso).
@@ -150,7 +152,7 @@ interface MarineResponse {
 }
 
 async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal })
+  const response = await openMeteoFetch(url, signal)
   if (!response.ok) throw new Error(`Falha ao buscar dados (${response.status})`)
   return (await response.json()) as T
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { seaPoints } from '../lib/weather'
 import type { Place } from '../lib/weather'
+import { openMeteoFetch } from '../lib/openMeteo'
 
 /** Ondas e vento de uma hora do dia */
 export interface HourConditions {
@@ -24,7 +25,7 @@ interface WindHourly {
 const TZ = 'timezone=America%2FSao_Paulo&forecast_days=7'
 
 async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(url, { signal })
+  const res = await openMeteoFetch(url, signal)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return (await res.json()) as T
 }

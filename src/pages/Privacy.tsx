@@ -78,7 +78,7 @@ const sections: PolicySection[] = [
       'Google Fonts: carrega as letras (fontes) do site.',
       'Google Maps: mostra o mapa na página Contato.',
       'YouTube: nas notícias com vídeo, a imagem de capa é carregada do YouTube. O vídeo só começa quando você clica, e usa o modo de privacidade ampliada (youtube-nocookie).',
-      'Open-Meteo: fornece a previsão do tempo, do mar e da maré das páginas Previsão do Tempo e Tábua de Maré.',
+      'Open-Meteo: fornece a previsão do tempo, do mar e da maré das páginas Previsão do Tempo e Tábua de Maré. O pedido passa antes pelo nosso servidor na Cloudflare, então o Open-Meteo não recebe o seu endereço de internet (IP).',
       'Google Agenda: recebe o alerta quando você escolhe salvar nele (segue a política de privacidade do Google).',
       'WhatsApp (Meta): recebe a mensagem que você decidir enviar.',
       'Cloudflare: empresa que hospeda o site e guarda registros técnicos de acesso, como data, hora e IP, para manter a segurança.',
