@@ -6,6 +6,7 @@
  *     para clientes (customer-api), liberado para uso comercial.
  *   - Sem a chave, usa o Open-Meteo gratuito.
  *   - Guarda cada resposta por 15 minutos, para não repetir pedidos iguais.
+ * • www.royalmarineubatuba.com.br: leva para royalmarineubatuba.com.br.
  * • Qualquer outro endereço: entrega as páginas do site.
  */
 
@@ -69,6 +70,11 @@ async function openMeteo(request, env, ctx, tipo) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
+    // www.royalmarineubatuba.com.br → royalmarineubatuba.com.br (um endereço só, melhor para o Google)
+    if (url.hostname === 'www.royalmarineubatuba.com.br') {
+      url.hostname = 'royalmarineubatuba.com.br'
+      return Response.redirect(url.toString(), 301)
+    }
     if (url.pathname.startsWith('/api/om/')) {
       if (request.method !== 'GET') return json({ error: 'Método não permitido' }, 405)
       return openMeteo(request, env, ctx, url.pathname.slice('/api/om/'.length))
