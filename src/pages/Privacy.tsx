@@ -81,7 +81,7 @@ const sections: PolicySection[] = [
       'Open-Meteo: fornece a previsão do tempo, do mar e da maré das páginas Previsão do Tempo e Tábua de Maré.',
       'Google Agenda: recebe o alerta quando você escolhe salvar nele (segue a política de privacidade do Google).',
       'WhatsApp (Meta): recebe a mensagem que você decidir enviar.',
-      'Vercel: empresa que hospeda o site e guarda registros técnicos de acesso, como data, hora e IP, para manter a segurança.',
+      'Cloudflare: empresa que hospeda o site e guarda registros técnicos de acesso, como data, hora e IP, para manter a segurança.',
     ],
   },
   {

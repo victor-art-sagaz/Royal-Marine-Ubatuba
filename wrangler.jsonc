@@ -1,0 +1,11 @@
+{
+  // Configuração do site na Cloudflare (Workers).
+  // "single-page-application" faz qualquer endereço do site (ex.: /tabua-de-mare) abrir a página certa,
+  // mesmo quando a pessoa entra direto pelo link ou atualiza a página.
+  "name": "royal-marine-ubatuba",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
