@@ -1,4 +1,4 @@
-import { Anchor, CloudSun, Info, LifeBuoy, MessageCircle, Mountain, Newspaper, Waves } from 'lucide-react'
+import { Anchor, CloudSun, Info, LifeBuoy, MessageCircle, Mountain, Newspaper, ShoppingBag, Waves } from 'lucide-react'
 import type { ContactInfo, MenuItem, Stat } from '../types'
 
 export const menuItems: MenuItem[] = [
@@ -10,6 +10,7 @@ export const menuItems: MenuItem[] = [
   { label: 'Nosso Blog', path: '/news', icon: Newspaper },
   { label: 'Contato', path: '/contact', icon: MessageCircle },
   { label: 'Sobre Ubatuba', path: '/newpage1', icon: Mountain },
+  { label: 'Loja do Navegante', path: '/loja', icon: ShoppingBag },
 ]
 
 export const contact: ContactInfo = {

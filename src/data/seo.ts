@@ -72,6 +72,13 @@ export const pageSeo: Record<string, PageSeo> = {
     title: 'Termos de Uso | Royal Marine - Garagem Náutica',
     description: 'Regras de uso do site e do app da Royal Marine, incluindo as informações de maré, tempo e alertas.',
   },
+  '/loja': {
+    title: 'Loja do Navegante | Royal Marine - Garagem Náutica em Ubatuba',
+    description:
+      'Achados para o seu barco, a pesca e a praia: segurança a bordo, motor, limpeza, ancoragem e eletrônicos, com as melhores ofertas do Mercado Livre.',
+    // Teste: fora do Google até a versão final
+    noindex: true,
+  },
   '/privacidade': {
     title: 'Política de Privacidade | Royal Marine - Garagem Náutica',
     description: 'Saiba como a Royal Marine cuida dos seus dados pessoais, de acordo com a LGPD.',
