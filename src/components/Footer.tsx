@@ -109,6 +109,14 @@ export default function Footer() {
           <div className="mt-12 flex flex-col items-center gap-2 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
             <Waves size={20} className="text-teal/70" />
             <p>© {new Date().getFullYear()} Royal Marine - Garagem Náutica. Todos os direitos reservados.</p>
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+              <Link to="/indique" className="underline-offset-4 transition hover:text-white hover:underline">
+                Indique um amigo
+              </Link>
+              <Link to="/avaliar" className="underline-offset-4 transition hover:text-white hover:underline">
+                Avalie a Royal Marine
+              </Link>
+            </div>
             <Link to="/privacidade" className="underline-offset-4 transition hover:text-white hover:underline">
               Política de Privacidade
             </Link>

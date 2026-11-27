@@ -5,6 +5,7 @@ import Pricing from '../components/Pricing'
 import Reveal from '../components/Reveal'
 import StatsBand from '../components/StatsBand'
 import StructureGallery from '../components/StructureGallery'
+import TrustSection from '../components/TrustSection'
 import WaveDivider from '../components/WaveDivider'
 import { contact, images } from '../data/site'
 import { whatsappUrl } from '../lib/whatsapp'
@@ -142,6 +143,8 @@ export default function Home() {
       <StructureGallery />
 
       <StatsBand />
+
+      <TrustSection />
 
       <GoogleReviews />
 

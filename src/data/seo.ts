@@ -72,6 +72,16 @@ export const pageSeo: Record<string, PageSeo> = {
     title: 'Termos de Uso | Royal Marine - Garagem Náutica',
     description: 'Regras de uso do site e do app da Royal Marine, incluindo as informações de maré, tempo e alertas.',
   },
+  '/indique': {
+    title: 'Indique um Amigo | Royal Marine - Garagem Náutica em Ubatuba',
+    description:
+      'Indique a Royal Marine para quem tem embarcação e ganhe um benefício na sua mensalidade. Crie o seu link e envie pelo WhatsApp.',
+  },
+  '/avaliar': {
+    title: 'Avalie a Royal Marine | Garagem Náutica em Ubatuba',
+    description: 'Conte no Google como foi a sua experiência na Royal Marine - Garagem Náutica, no Saco da Ribeira.',
+    noindex: true,
+  },
   '/privacidade': {
     title: 'Política de Privacidade | Royal Marine - Garagem Náutica',
     description: 'Saiba como a Royal Marine cuida dos seus dados pessoais, de acordo com a LGPD.',

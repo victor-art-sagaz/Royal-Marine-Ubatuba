@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useReducedMotion } from 'framer-motion'
-import { Hand, Send } from 'lucide-react'
-import { interestOptions } from '../data/experiences'
+import { useSearchParams } from 'react-router-dom'
+import { Gift, Hand, Send } from 'lucide-react'
+import { interestOptions, sourceOptions } from '../data/experiences'
 import { BOAT_LENGTH, BOAT_WIDTH, BoatController } from '../lib/seaEngine'
 import { FIELD_ORDER, maskPhone, validateBooking } from '../lib/validation'
 import type { BookingErrors, BookingValues } from '../types'
@@ -19,6 +20,8 @@ const initialValues: BookingValues = {
   boatSize: '',
   interest: '',
   message: '',
+  source: '',
+  referrer: '',
   website: '',
 }
 
@@ -54,6 +57,9 @@ export default function BookingForm() {
   const [submitting, setSubmitting] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [showHint, setShowHint] = useState(true)
+  const [searchParams] = useSearchParams()
+  // Link de indicação (ex.: /contact?indicacao=Joao): já marca "Indicação" e o nome de quem indicou
+  const referralName = (searchParams.get('indicacao') ?? '').trim().slice(0, 60)
 
   const sectionRef = useRef<HTMLElement>(null)
   const waterRef = useRef<HTMLCanvasElement>(null)
@@ -90,6 +96,11 @@ export default function BookingForm() {
       engineRef.current = null
     }
   }, [reduce])
+
+  useEffect(() => {
+    if (!referralName) return
+    setValues((current) => ({ ...current, source: 'indicacao', referrer: referralName }))
+  }, [referralName])
 
   function setField<K extends keyof BookingValues>(key: K, value: BookingValues[K]) {
     setValues((current) => ({ ...current, [key]: value }))
@@ -157,6 +168,14 @@ export default function BookingForm() {
           <p className="mb-5 text-sm font-light leading-relaxed text-white/80">
             Preencha o formulário com seus dados que entraremos em contato.
           </p>
+          {referralName ? (
+            <p className="mb-5 flex items-start gap-2 rounded-2xl border border-gold/50 bg-gold/15 px-4 py-3 text-sm text-white">
+              <Gift size={18} className="mt-0.5 shrink-0 text-[#f6e3a0]" aria-hidden="true" />
+              <span>
+                Você foi indicado por <strong className="font-medium">{referralName}</strong>. Seja bem-vindo à Royal Marine!
+              </span>
+            </p>
+          ) : null}
 
           <form id="booking-form" onSubmit={handleSubmit} noValidate className="grid gap-4">
             {/* Campo-armadilha para robôs (invisível para pessoas) */}
@@ -292,6 +311,45 @@ export default function BookingForm() {
                 />
                 {errors.boatSize ? <p className={errorClass}>{errors.boatSize}</p> : null}
               </div>
+            </div>
+
+            <div className={values.source === 'indicacao' ? 'grid gap-4 sm:grid-cols-2' : ''}>
+              <div>
+                <label className={labelClass} htmlFor="field-source">
+                  Como conheceu a Royal Marine? (opcional)
+                </label>
+                <select
+                  id="field-source"
+                  className={`${inputClass} appearance-none [&>option]:text-navy`}
+                  value={values.source}
+                  onChange={(event) => setField('source', event.target.value as BookingValues['source'])}
+                >
+                  <option value="">Escolha uma opção</option>
+                  {sourceOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {values.source === 'indicacao' ? (
+                <div>
+                  <label className={labelClass} htmlFor="field-referrer">
+                    Quem indicou?
+                  </label>
+                  <input
+                    id="field-referrer"
+                    className={inputClass}
+                    type="text"
+                    maxLength={60}
+                    placeholder="Nome de quem indicou"
+                    value={values.referrer}
+                    onChange={(event) => setField('referrer', event.target.value)}
+                    aria-invalid={Boolean(errors.referrer)}
+                  />
+                  {errors.referrer ? <p className={errorClass}>{errors.referrer}</p> : null}
+                </div>
+              ) : null}
             </div>
 
             <div>

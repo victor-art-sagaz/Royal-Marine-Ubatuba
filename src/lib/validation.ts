@@ -1,5 +1,5 @@
 import { contact } from '../data/site'
-import { getInterest } from '../data/experiences'
+import { getInterest, getSource } from '../data/experiences'
 import type { BookingErrors, BookingField, BookingValues } from '../types'
 
 /** Ordem em que os campos aparecem (o primeiro com erro recebe o foco). */
@@ -10,6 +10,8 @@ export const FIELD_ORDER: BookingField[] = [
   'interest',
   'boatName',
   'boatSize',
+  'source',
+  'referrer',
   'message',
 ]
 
@@ -63,6 +65,10 @@ export function validateBooking(values: BookingValues): BookingErrors {
     errors.boatSize = 'Use no máximo 20 caracteres. Ex.: 32 pés ou 10 m'
   }
 
+  if (values.referrer.trim().length > 60) {
+    errors.referrer = 'Use no máximo 60 caracteres.'
+  }
+
   if (values.message.length > 500) {
     errors.message = 'Use no máximo 500 caracteres na mensagem.'
   }
@@ -73,6 +79,7 @@ export function validateBooking(values: BookingValues): BookingErrors {
 /** Monta a mensagem já formatada que será enviada para o WhatsApp da Royal Marine. */
 export function buildWhatsAppMessage(values: BookingValues): string {
   const interest = getInterest(values.interest)
+  const source = getSource(values.source)
   const orDash = (text: string) => (text.trim() === '' ? 'Não informado' : text.trim())
 
   return [
@@ -85,6 +92,8 @@ export function buildWhatsAppMessage(values: BookingValues): string {
     `🔎 Interessado em: ${interest ? interest.label : 'Não informado'}`,
     `🚤 Embarcação: ${orDash(values.boatName)}`,
     `📏 Tamanho: ${orDash(values.boatSize)}`,
+    `📣 Como conheceu: ${source ? source.label : 'Não informado'}`,
+    ...(values.source === 'indicacao' ? [`🤝 Indicado por: ${orDash(values.referrer)}`] : []),
     `📝 Mensagem: ${orDash(values.message)}`,
     '',
     'Aguardo o retorno. Obrigado!',

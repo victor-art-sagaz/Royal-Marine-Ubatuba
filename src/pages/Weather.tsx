@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import AlertDialog from '../components/AlertDialog'
 import type { AlertTarget } from '../components/AlertDialog'
 import InstallAppButton from '../components/InstallAppButton'
+import ShareWhatsAppButton from '../components/ShareWhatsAppButton'
 import { dateFromBrazilIso } from '../lib/alerts'
 import GlassButton from '../components/GlassButton'
 import Reveal from '../components/Reveal'
@@ -474,6 +475,35 @@ function AlertsSection({ data }: { data: WeatherBundle }) {
   )
 }
 
+/* ------------------------------ Boletim para o WhatsApp ------------------------------ */
+
+function weatherShareText(data: WeatherBundle): string {
+  const { current, daily, marine } = data
+  const today = daily[0]
+  const info = describeWeather(current.code)
+  const level = seaLevel(marine?.waveHeight ?? null, current.windGusts)
+  const date = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo' })
+  const lines = [
+    '⛅ *Boletim do Mar – Ubatuba*',
+    `📅 ${date.replace(/^\w/, (c) => c.toUpperCase())}`,
+    `🌡️ Agora ${round(current.temperature)}° · ${info.label}`,
+  ]
+  if (today) {
+    lines.push(`↕️ Máx. ${round(today.tMax)}° / mín. ${round(today.tMin)}° · chuva ${round(today.precipProbMax)}%`)
+  }
+  lines.push(`💨 Vento ${round(current.windSpeed)} km/h ${directionLabel(current.windDirection)} (rajadas ${round(current.windGusts)} km/h)`)
+  if (marine?.waveHeight != null) {
+    lines.push(`🌊 Ondas ${marine.waveHeight.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} m · mar ${level}`)
+  }
+  lines.push(
+    '',
+    'Boletim da Royal Marine – Garagem Náutica ⚓',
+    'Previsão completa, hora a hora:',
+    'https://royalmarineubatuba.com.br/newpage',
+  )
+  return lines.join('\n')
+}
+
 /* ------------------------------------- Página ------------------------------------- */
 
 export default function Weather() {
@@ -512,6 +542,9 @@ export default function Weather() {
       <section className="bg-white py-12 text-center">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6">
           <div className="flex flex-wrap items-center justify-center gap-3">
+            {ready ? (
+              <ShareWhatsAppButton tone="dark" label="Compartilhar o boletim no WhatsApp" text={weatherShareText(ready)} />
+            ) : null}
             <InstallAppButton />
             <GlassButton href={GOOGLE_WEATHER_URL} external tone="dark" icon={<ExternalLink size={16} />}>
               Ver previsão também no Google

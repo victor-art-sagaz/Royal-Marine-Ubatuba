@@ -4,6 +4,7 @@ import AlertDialog from '../components/AlertDialog'
 import type { AlertTarget } from '../components/AlertDialog'
 import InstallAppButton from '../components/InstallAppButton'
 import GlassButton from '../components/GlassButton'
+import ShareWhatsAppButton from '../components/ShareWhatsAppButton'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
 import { fetchTides, formatHour } from '../lib/tide'
@@ -276,6 +277,24 @@ export function TideChart({
 
 /* ------------------------------ Página ------------------------------ */
 
+/** Texto do boletim de maré para enviar no WhatsApp */
+function tideShareText(date: string, index: number, extremes: { type: 'high' | 'low'; hour: number; height: number }[], fish: string) {
+  const label = dayLabel(date, index)
+  const lines = extremes.map(
+    (e) => `${e.type === 'high' ? '⬆️ Preia-mar' : '⬇️ Baixa-mar'} ${formatHour(e.hour)} (${meters(e.height)})`,
+  )
+  return [
+    '🌊 *Tábua de Maré – Saco da Ribeira, Ubatuba*',
+    `📅 ${label.top} · ${label.bottom}`,
+    ...lines,
+    `🎣 Atividade dos peixes: ${fish}`,
+    '',
+    'Boletim da Royal Marine – Garagem Náutica ⚓',
+    'Veja os outros dias e crie alertas:',
+    'https://royalmarineubatuba.com.br/tabua-de-mare',
+  ].join('\n')
+}
+
 export default function Tide() {
   const { state, reload } = useTides()
   const [selected, setSelected] = useState(0)
@@ -486,6 +505,13 @@ export default function Tide() {
         ) : null}
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          {day && solunar ? (
+            <ShareWhatsAppButton
+              tone="dark"
+              label="Compartilhar a maré no WhatsApp"
+              text={tideShareText(day.date, days.indexOf(day), day.extremes, solunar.level)}
+            />
+          ) : null}
           <InstallAppButton />
           <GlassButton href={TABUA_DE_MARES_URL} external tone="dark" icon={<ExternalLink size={16} />}>
             Ver também no tabuademares.com

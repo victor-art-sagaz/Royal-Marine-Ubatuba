@@ -30,6 +30,7 @@ const sections: PolicySection[] = [
       'nome, e-mail e telefone;',
       'nome e tamanho da sua embarcação;',
       'o que você procura (garagem náutica ou embarcação);',
+      'como conheceu a Royal Marine e, se foi por indicação, o nome de quem indicou (opcional);',
       'a mensagem que você escrever.',
     ],
   },

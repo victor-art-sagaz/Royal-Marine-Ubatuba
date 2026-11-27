@@ -11,6 +11,12 @@ export const reviewSummary: ReviewSummary = { score: 4.9, count: 23 }
 
 // Link para o botão "Ver todas no Google" (busca da empresa no Google Maps).
 // Se tiver o link direto da página de avaliações, cole aqui no lugar.
+// Link do botão "Avaliar no Google" (página /avaliar e QR Code da recepção).
+// Para abrir direto a janela de avaliação: no Perfil da Empresa no Google, clique em
+// "Pedir avaliações", copie o link (algo como https://g.page/r/XXXX/review) e cole aqui.
+export const googleWriteReviewUrl =
+  'https://www.google.com/maps/search/?api=1&query=Royal+Marine+garagem+n%C3%A1utica+Ubatuba'
+
 export const googleReviewsUrl =
   'https://www.google.com/maps/search/?api=1&query=Royal+Marine+garagem+n%C3%A1utica+Ubatuba'
 

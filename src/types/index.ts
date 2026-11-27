@@ -117,6 +117,14 @@ export interface InterestOption {
   icon: LucideIcon
 }
 
+/** De onde a pessoa conheceu a Royal Marine (campo "Como conheceu a Royal Marine?") */
+export type SourceId = 'google' | 'instagram' | 'indicacao' | 'whatsapp' | 'passando' | 'evento' | 'outro'
+
+export interface SourceOption {
+  id: SourceId
+  label: string
+}
+
 export interface BookingValues {
   name: string
   email: string
@@ -125,6 +133,10 @@ export interface BookingValues {
   boatSize: string
   interest: InterestId | ''
   message: string
+  /** Como conheceu a Royal Marine (opcional) */
+  source: SourceId | ''
+  /** Nome de quem indicou (aparece quando a pessoa escolhe "Indicação") */
+  referrer: string
   /** Campo-armadilha contra robôs: precisa ficar sempre vazio. */
   website: string
 }
